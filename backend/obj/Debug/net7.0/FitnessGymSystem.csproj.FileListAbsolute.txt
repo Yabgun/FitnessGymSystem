@@ -1,0 +1,7 @@
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.csproj.AssemblyReference.cache
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.AssemblyInfoInputs.cache
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.AssemblyInfo.cs
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.csproj.CoreCompileInputs.cache
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\MONSTER\Desktop\FitnessGymSystem\backend\obj\Debug\net7.0\FitnessGymSystem.MvcApplicationPartsAssemblyInfo.cache
