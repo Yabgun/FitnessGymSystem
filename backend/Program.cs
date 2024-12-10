@@ -49,10 +49,7 @@ builder.Services.AddAuthorization();
 // DBContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseMySql(connectionString,
-        new MySqlServerVersion(new Version(9, 1, 0)));
-});
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\MONSTER\\Desktop\\FitnessGymSystem\\backend\\FitnessGymSystem.csproj": {}
+    "/Users/buraktutumlu/bugra/FitnessGymSystem/backend/FitnessGymSystem.csproj": {}
   },
   "projects": {
-    "C:\\Users\\MONSTER\\Desktop\\FitnessGymSystem\\backend\\FitnessGymSystem.csproj": {
+    "/Users/buraktutumlu/bugra/FitnessGymSystem/backend/FitnessGymSystem.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\MONSTER\\Desktop\\FitnessGymSystem\\backend\\FitnessGymSystem.csproj",
+        "projectUniqueName": "/Users/buraktutumlu/bugra/FitnessGymSystem/backend/FitnessGymSystem.csproj",
         "projectName": "FitnessGymSystem",
-        "projectPath": "C:\\Users\\MONSTER\\Desktop\\FitnessGymSystem\\backend\\FitnessGymSystem.csproj",
-        "packagesPath": "C:\\Users\\MONSTER\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\MONSTER\\Desktop\\FitnessGymSystem\\backend\\obj\\",
+        "projectPath": "/Users/buraktutumlu/bugra/FitnessGymSystem/backend/FitnessGymSystem.csproj",
+        "packagesPath": "/Users/buraktutumlu/.nuget/packages/",
+        "outputPath": "/Users/buraktutumlu/bugra/FitnessGymSystem/backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\MONSTER\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/buraktutumlu/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,13 +32,7 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -52,10 +46,6 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.AspNetCore.OpenApi": {
-              "target": "Package",
-              "version": "[8.0.0, )"
-            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.0, )"
@@ -66,21 +56,19 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.IdentityModel.Tokens": {
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.0, )"
             },
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[8.0.0-beta.2, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[7.1.0, )"
-            },
-            "System.IdentityModel.Tokens.Jwt": {
-              "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[6.5.0, )"
             }
           },
           "imports": [
@@ -102,7 +90,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@8/8.0.11/libexec/sdk/8.0.111/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

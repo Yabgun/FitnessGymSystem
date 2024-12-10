@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "GVjwqCQ1wKYvLq+iN0joTmBHcEejXFXtFLyuXcQJtG0=",
+  "Hash": "z81ejs7K/WJJ0dCOgig9CGaNkH0R2GFKkj1GEUQ0HSU=",
   "Source": "FitnessGymSystem",
   "BasePath": "_content/FitnessGymSystem",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }

@@ -1,0 +1,111 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.auth-box {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+}
+
+.auth-tab.active {
+  color: #6c5ce7;
+  border-bottom: 2px solid #6c5ce7;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.auth-button {
+  background-color: #6c5ce7;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.auth-button:hover {
+  background-color: #5b4bc4;
+}
+
+.auth-message {
+  color: #e74c3c;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.social-login {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.social-login p {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.social-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.social-button img {
+  width: 20px;
+  height: 20px;
+}
+
+.social-button:hover {
+  background-color: #f5f5f5;
+} 

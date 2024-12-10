@@ -29,7 +29,7 @@ namespace FitnessGymSystem.Controllers
         {
             if (await _context.Users.AnyAsync(u => u.Username == userDto.Username))
             {
-                return BadRequest("Bu kullanıcı adı zaten alınmış.");
+                return BadRequest(new { success = false, message = "Bu kullanıcı adı zaten alınmış." });
             }
 
             var user = new User
@@ -42,7 +42,17 @@ namespace FitnessGymSystem.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok("Kayıt başarılı");
+            Response.ContentType = "application/json";
+            
+            return Ok(new { 
+                success = true,
+                message = "Kayıt başarılı",
+                data = new {
+                    id = user.Id,
+                    username = user.Username,
+                    email = user.Email
+                }
+            });
         }
 
         [HttpPost("login")]
@@ -51,11 +61,18 @@ namespace FitnessGymSystem.Controllers
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginDto.Username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.PasswordHash, user.PasswordHash))
             {
-                return Unauthorized("Kullanıcı adı veya şifre hatalı.");
+                return Unauthorized(new { success = false, message = "Kullanıcı adı veya şifre hatalı." });
             }
 
             var token = CreateToken(user);
-            return Ok(new { token });
+            
+            Response.ContentType = "application/json";
+            
+            return Ok(new { 
+                success = true,
+                message = "Giriş başarılı",
+                token = token 
+            });
         }
 
         private string CreateToken(User user)

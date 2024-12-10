@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+.dashboard {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.dashboard-nav {
+  background-color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dashboard-content {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
