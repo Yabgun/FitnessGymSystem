@@ -55,48 +55,54 @@ namespace FitnessGymSystem.Controllers
             });
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] User loginDto)
+        private string GenerateJwtToken(User user)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginDto.Username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.PasswordHash, user.PasswordHash))
-            {
-                return Unauthorized(new { success = false, message = "Kullanıcı adı veya şifre hatalı." });
-            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = CreateToken(user);
-            
-            Response.ContentType = "application/json";
-            
-            return Ok(new { 
-                success = true,
-                message = "Giriş başarılı",
-                token = token 
-            });
-        }
-
-        private string CreateToken(User user)
-        {
-            var jwtSection = _configuration.GetSection("Jwt");
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(1);
-
             var token = new JwtSecurityToken(
-                issuer: jwtSection["Issuer"],
-                audience: jwtSection["Audience"],
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: expires,
-                signingCredentials: creds
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
+                }
+
+                bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+                if (!isValidPassword)
+                {
+                    return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
+                }
+
+                var token = GenerateJwtToken(user);
+                return Ok(new { token = token });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Bir hata oluştu", error = ex.Message });
+            }
         }
     }
 }

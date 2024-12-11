@@ -1,0 +1,66 @@
+.schedule-container {
+  padding: 20px;
+}
+
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.time-slot {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.time-header {
+  background: #3498db;
+  color: white;
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+.classes-list {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.schedule-class-card {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 15px;
+  border: 1px solid #eee;
+}
+
+.schedule-class-card h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.class-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.class-info strong {
+  color: #34495e;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-message {
+  color: #e74c3c;
+  background: #fde8e8;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+} 

@@ -3,12 +3,13 @@ using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace FitnessGymSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Giriş yapmış kullanıcıların erişimi için
+    [Authorize] // Tüm controller'ı yetkilendirme gerektirir
     public class MembersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -20,8 +21,11 @@ namespace FitnessGymSystem.Controllers
 
         // Tüm üyeleri getir
         [HttpGet]
-        public async Task<IActionResult> GetMembers()
+        public async Task<ActionResult<IEnumerable<Member>>> GetMembers()
         {
+            // Giriş yapmış kullanıcının ID'sini almak için:
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
             var members = await _context.Members
                 .Include(m => m.MemberClasses)
                 .ThenInclude(mc => mc.Class)
