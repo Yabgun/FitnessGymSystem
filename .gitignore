@@ -1,15 +1,59 @@
-# .NET Core
-bin/
-obj/
+# .NET Core build outputs
+backend/[Bb]in/
+backend/[Oo]bj/
+backend/[Dd]ebug/
+backend/[Rr]elease/
+
+# Visual Studio files
+.vs/
 *.user
 *.userosscache
 *.suo
 *.userprefs
-.vs/
+
+# Build results
 [Dd]ebug/
 [Rr]elease/
 x64/
 x86/
+[Bb]in/
+[Oo]bj/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Visual Studio for Mac
+.vscode/
+.idea/
+*.userprefs
+*.usertasks
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
@@ -18,52 +62,88 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-# Sensitive Files
-appsettings.Development.json
-*.Development.json
-*.local.json
-*.Production.json
-*.Staging.json
+# Visual Studio cache/options directory
+.vs/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# NuGet Packages
+*.nupkg
+# NuGet Symbol Packages
+*.snupkg
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/[Pp]ackages/repositories.config
+# NuGet v3's project.json files produces more ignorable files
+*.nuget.props
+*.nuget.targets
 
 # Node.js / React
 node_modules/
+/build
+/.pnp
+.pnp.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Environment files
 .env
 .env.local
-.env.development
-.env.test
-.env.production
-build/
-dist/
-coverage/
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Cache and temp files
+*.cache
+*.tmp
+*.temp
 .history/
 
 # Project specific
-*.log
-logs/
-temp/
-tmp/
+/backend/bin/
+/backend/obj/
+/frontend/build/
+/frontend/node_modules/
 
-# Dependencies
-package-lock.json
-yarn.lock
+# Sensitive configuration files
+appsettings.Development.json
+*.Development.json
+*.Production.json
+*.Staging.json
 
-# Database
+# Database files
 *.db
 *.sqlite
 *.sqlite3
-
-# Misc
-*.bak
-*.cache
-*.tmp 
