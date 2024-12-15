@@ -1,25 +1,39 @@
 // Models/Class.cs
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FitnessGymSystem.Models
 {
     public class Class
-{
-    public int Id { get; set; }
-    public string ClassName { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    {
+        public int Id { get; set; }
 
-    // ClassCategory ile ilişki
-    public int ClassCategoryId { get; set; }
-    public ClassCategory ClassCategory { get; set; }
+        [Required]
+        public string ClassName { get; set; }
 
-    public int InstructorId { get; set; }
-    public Instructor Instructor { get; set; }
+        public string Description { get; set; }
 
-    public ICollection<MemberClass> MemberClasses { get; set; }
-}
+        [Required]
+        public DateTime StartTime { get; set; }
 
+        [Required]
+        public DateTime EndTime { get; set; }
 
+        [Required]
+        [Range(1, 50)]
+        public int Capacity { get; set; }
+
+        public int ClassCategoryId { get; set; }
+        [JsonIgnore]
+        public virtual ClassCategory? ClassCategory { get; set; }
+
+        public int InstructorId { get; set; }
+        [JsonIgnore]
+        public virtual Instructor? Instructor { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<MemberClass>? MemberClasses { get; set; }
+    }
 }

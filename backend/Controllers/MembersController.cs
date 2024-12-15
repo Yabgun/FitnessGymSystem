@@ -9,7 +9,7 @@ namespace FitnessGymSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Tüm controller'ı yetkilendirme gerektirir
+    // [Authorize] // Şimdilik kaldırıyoruz
     public class MembersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,89 +23,102 @@ namespace FitnessGymSystem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Member>>> GetMembers()
         {
-            // Giriş yapmış kullanıcının ID'sini almak için:
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            
             var members = await _context.Members
                 .Include(m => m.MemberClasses)
-                .ThenInclude(mc => mc.Class)
+                    .ThenInclude(mc => mc.Class)
                 .ToListAsync();
-
             return Ok(members);
         }
 
-        // Belirli bir üyeyi ID'ye göre getir
+        // Belirli bir üyeyi getir
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetMember(int id)
+        public async Task<ActionResult<Member>> GetMember(int id)
         {
             var member = await _context.Members
                 .Include(m => m.MemberClasses)
-                .ThenInclude(mc => mc.Class)
+                    .ThenInclude(mc => mc.Class)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (member == null) 
-                return NotFound(new { message = "Üye bulunamadı." });
-
-            return Ok(member);
-        }
-
-        // Yeni üye oluştur
-       [HttpPost]
-public async Task<IActionResult> CreateMember([FromBody] Member member)
-{
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(ModelState);
-    }
-
-    // Gönderilen memberClasses içindeki sadece classId'yi kullanarak ilişkilendirme yap
-    if (member.MemberClasses != null)
-    {
-        foreach (var memberClass in member.MemberClasses)
-        {
-            memberClass.Member = member; // Üye ile ilişkilendirme
-            _context.MemberClasses.Add(memberClass);
-        }
-    }
-
-    _context.Members.Add(member);
-    await _context.SaveChangesAsync();
-
-    return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
-}
-
-
-        // Varolan bir üyeyi güncelle
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMember(int id, [FromBody] Member updated)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var member = await _context.Members.FindAsync(id);
             if (member == null)
-                return NotFound(new { message = "Üye bulunamadı." });
+            {
+                return NotFound();
+            }
 
-            // Alanları güncelle
-            member.FirstName = updated.FirstName;
-            member.LastName = updated.LastName;
-            member.DateOfBirth = updated.DateOfBirth;
-
-            await _context.SaveChangesAsync();
-            return Ok(member);
+            return member;
         }
 
-        // Bir üyeyi sil
+        // Yeni üye ekle
+        [HttpPost]
+        public async Task<ActionResult<Member>> CreateMember(Member member)
+        {
+            _context.Members.Add(member);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
+        }
+
+        // Üye güncelle
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateMember(int id, [FromBody] Member member)
+        {
+            try 
+            {
+                var existingMember = await _context.Members
+                    .Include(m => m.MemberClasses)
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (existingMember == null)
+                {
+                    return NotFound(new { message = "Üye bulunamadı" });
+                }
+
+                // Temel bilgileri güncelle
+                existingMember.FirstName = member.FirstName;
+                existingMember.LastName = member.LastName;
+                existingMember.DateOfBirth = member.DateOfBirth;
+
+                // Mevcut sınıf kayıtlarını güncelle
+                if (existingMember.MemberClasses != null)
+                {
+                    _context.MemberClasses.RemoveRange(existingMember.MemberClasses);
+                }
+
+                if (member.MemberClasses != null)
+                {
+                    foreach (var memberClass in member.MemberClasses)
+                    {
+                        memberClass.MemberId = id;
+                        _context.MemberClasses.Add(memberClass);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(existingMember);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Üye güncellenirken bir hata oluştu", error = ex.Message });
+            }
+        }
+
+        // Üye sil
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMember(int id)
         {
-            var member = await _context.Members.FindAsync(id);
-            if (member == null)
-                return NotFound(new { message = "Üye bulunamadı." });
+            var member = await _context.Members
+                .Include(m => m.MemberClasses)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
+            if (member == null)
+            {
+                return NotFound();
+            }
+
+            _context.MemberClasses.RemoveRange(member.MemberClasses);
             _context.Members.Remove(member);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Üye başarıyla silindi." });
+
+            return NoContent();
         }
     }
 }

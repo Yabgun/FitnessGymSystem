@@ -4,12 +4,12 @@ import axios from '../../services/axiosConfig';
 import './Categories.css';
 
 function AddCategory() {
-  const navigate = useNavigate();
   const [category, setCategory] = useState({
     name: '',
     description: ''
   });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,38 +22,33 @@ function AddCategory() {
   };
 
   return (
-    <div className="category-form-container">
+    <div className="category-form">
       <h2>Yeni Kategori Ekle</h2>
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error">{error}</div>}
       
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Kategori Adı</label>
+        <div>
+          <label>Kategori Adı:</label>
           <input
             type="text"
             value={category.name}
             onChange={(e) => setCategory({...category, name: e.target.value})}
             required
+            maxLength={100}
           />
         </div>
 
-        <div className="form-group">
-          <label>Açıklama</label>
+        <div>
+          <label>Açıklama:</label>
           <textarea
             value={category.description}
             onChange={(e) => setCategory({...category, description: e.target.value})}
-            rows="4"
+            maxLength={500}
           />
         </div>
 
-        <div className="form-actions">
-          <button type="button" onClick={() => navigate('/categories')} className="cancel-button">
-            İptal
-          </button>
-          <button type="submit" className="submit-button">
-            Kaydet
-          </button>
-        </div>
+        <button type="submit">Kaydet</button>
+        <button type="button" onClick={() => navigate('/categories')}>İptal</button>
       </form>
     </div>
   );

@@ -25,10 +25,17 @@ namespace FitnessGymSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
                     b.Property<int>("ClassCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -56,9 +63,15 @@ namespace FitnessGymSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
 
@@ -69,6 +82,9 @@ namespace FitnessGymSystem.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ClassCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
@@ -84,6 +100,8 @@ namespace FitnessGymSystem.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassCategoryId");
 
                     b.ToTable("Instructors");
                 });
@@ -133,17 +151,23 @@ namespace FitnessGymSystem.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -165,6 +189,15 @@ namespace FitnessGymSystem.Migrations
                     b.Navigation("ClassCategory");
 
                     b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("FitnessGymSystem.Models.Instructor", b =>
+                {
+                    b.HasOne("FitnessGymSystem.Models.ClassCategory", "ClassCategory")
+                        .WithMany()
+                        .HasForeignKey("ClassCategoryId");
+
+                    b.Navigation("ClassCategory");
                 });
 
             modelBuilder.Entity("FitnessGymSystem.Models.MemberClass", b =>

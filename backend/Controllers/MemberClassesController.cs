@@ -50,5 +50,27 @@ namespace FitnessGymSystem.Controllers
                 .ToListAsync();
             return Ok(members);
         }
+
+        [HttpDelete("{memberId}/{classId}")]
+        public async Task<IActionResult> DeleteMemberClass(int memberId, int classId)
+        {
+            try
+            {
+                var memberClass = await _context.MemberClasses
+                    .FirstOrDefaultAsync(mc => mc.MemberId == memberId && mc.ClassId == classId);
+
+                if (memberClass == null)
+                    return NotFound(new { message = "Üye-sınıf ilişkisi bulunamadı." });
+
+                _context.MemberClasses.Remove(memberClass);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Üye sınıftan başarıyla çıkarıldı." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "İşlem sırasında bir hata oluştu.", error = ex.Message });
+            }
+        }
     }
 }

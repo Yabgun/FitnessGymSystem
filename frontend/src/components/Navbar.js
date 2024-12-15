@@ -1,22 +1,53 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
-function Navbar({ onLogout }) {
+function Navbar({ isAuthenticated, user, onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate('/login');
+  };
+
+  const menuItems = [
+    { path: 'http://localhost:3000/members', label: 'Üyeler' },
+    { path: 'http://localhost:3000/classes', label: 'Sınıflar' },
+    { path: 'http://localhost:3000/categories', label: 'Kategoriler' },
+    { path: 'http://localhost:3000/instructors', label: 'Eğitmenler' },
+    { path: 'http://localhost:3000/schedule', label: 'Program' }
+  ];
+
   return (
     <nav className="navbar">
-      <div className="nav-brand">
-        Fitness Gym System
+      <div className="navbar-brand">
+        <Link to="/">Fitness Gym</Link>
       </div>
-      <ul className="nav-links">
-        <li><Link to="/">Ana Sayfa</Link></li>
-        <li><Link to="/members">Üyeler</Link></li>
-        <li><Link to="/classes">Sınıflar</Link></li>
-        <li><Link to="/categories">Kategoriler</Link></li>
-        <li><Link to="/instructors">Eğitmenler</Link></li>
-        <li><Link to="/schedule">Program</Link></li>
-        <li><button onClick={onLogout} className="logout-button">Çıkış Yap</button></li>
-      </ul>
+      <div className="navbar-menu">
+        {isAuthenticated ? (
+          <>
+            <span className="welcome-text">
+              Hoş geldin, {user?.username}
+            </span>
+            {menuItems.map((item) => (
+              <Link 
+                key={item.path} 
+                to={item.path}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <button 
+              onClick={handleLogout} 
+              className="logout-button"
+            >
+              Çıkış
+            </button>
+          </>
+        ) : (
+          <Link to="/login">Giriş Yap</Link>
+        )}
+      </div>
     </nav>
   );
 }

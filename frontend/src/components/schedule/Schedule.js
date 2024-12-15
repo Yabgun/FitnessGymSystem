@@ -14,11 +14,7 @@ function Schedule() {
   const fetchClasses = async () => {
     try {
       const response = await axios.get('/api/Classes');
-      const sortedClasses = response.data.sort((a, b) => {
-        // Önce startTime'a göre sırala
-        return new Date('1970/01/01 ' + a.startTime) - new Date('1970/01/01 ' + b.startTime);
-      });
-      setClasses(sortedClasses);
+      setClasses(response.data);
       setLoading(false);
     } catch (err) {
       setError('Program yüklenirken bir hata oluştu');
@@ -26,51 +22,49 @@ function Schedule() {
     }
   };
 
-  const groupClassesByTime = () => {
-    const groupedClasses = {};
-    classes.forEach(cls => {
-      const time = `${cls.startTime} - ${cls.endTime}`;
-      if (!groupedClasses[time]) {
-        groupedClasses[time] = [];
-      }
-      groupedClasses[time].push(cls);
-    });
-    return groupedClasses;
-  };
+  const timeSlots = Array.from({ length: 14 }, (_, i) => i + 8); // 08:00 - 21:00
+  const daysOfWeek = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
-  if (loading) return <div className="loading">Yükleniyor...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-
-  const groupedClasses = groupClassesByTime();
+  if (loading) return <div>Yükleniyor...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="schedule-container">
-      <h2>Ders Programı</h2>
+      <h2>Haftalık Ders Programı</h2>
       
       <div className="schedule-grid">
-        {Object.entries(groupedClasses).map(([time, timeClasses]) => (
-          <div key={time} className="time-slot">
-            <div className="time-header">{time}</div>
-            <div className="classes-list">
-              {timeClasses.map(cls => (
-                <div key={cls.id} className="schedule-class-card">
-                  <h3>{cls.className}</h3>
-                  <div className="class-info">
-                    <p>
-                      <strong>Eğitmen:</strong> {cls.instructor?.firstName} {cls.instructor?.lastName}
-                    </p>
-                    <p>
-                      <strong>Kategori:</strong> {cls.classCategory?.name}
-                    </p>
-                    {cls.memberClasses && (
-                      <p>
-                        <strong>Katılımcı Sayısı:</strong> {cls.memberClasses.length}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+        <div className="time-column">
+          <div className="header-cell">Saat</div>
+          {timeSlots.map(time => (
+            <div key={time} className="time-cell">
+              {`${time.toString().padStart(2, '0')}:00`}
             </div>
+          ))}
+        </div>
+
+        {daysOfWeek.map(day => (
+          <div key={day} className="day-column">
+            <div className="header-cell">{day}</div>
+            {timeSlots.map(time => {
+              const classesAtTime = classes.filter(cls => {
+                const startHour = new Date(`1970-01-01T${cls.startTime}`).getHours();
+                return startHour === time;
+              });
+
+              return (
+                <div key={time} className="schedule-cell">
+                  {classesAtTime.map(cls => (
+                    <div key={cls.id} className="class-item">
+                      <div className="class-name">{cls.className}</div>
+                      <div className="class-details">
+                        <small>{cls.instructor?.firstName} {cls.instructor?.lastName}</small>
+                        <small>({cls.capacity} kişilik)</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>

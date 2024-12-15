@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../services/axiosConfig';
-import './Classes.css';
+import '../../styles/common.css';
 
 function ClassesList() {
-  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchClasses();
@@ -18,8 +17,8 @@ function ClassesList() {
       const response = await axios.get('/api/Classes');
       setClasses(response.data);
       setLoading(false);
-    } catch (err) {
-      setError('Sınıflar yüklenirken bir hata oluştu');
+    } catch (error) {
+      console.error('Error fetching classes:', error);
       setLoading(false);
     }
   };
@@ -29,59 +28,70 @@ function ClassesList() {
       try {
         await axios.delete(`/api/Classes/${id}`);
         fetchClasses();
-      } catch (err) {
-        setError('Sınıf silinirken bir hata oluştu');
+      } catch (error) {
+        console.error('Error deleting class:', error);
       }
     }
   };
 
-  if (loading) return <div className="loading">Yükleniyor...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) {
+    return <div className="page-container">Yükleniyor...</div>;
+  }
 
   return (
-    <div className="classes-list-container">
-      <div className="list-header">
-        <h2>Sınıflar</h2>
-        <button onClick={() => navigate('/classes/add')} className="add-button">
-          Yeni Sınıf
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Sınıflar</h1>
+        <button 
+          className="button button-primary"
+          onClick={() => navigate('/classes/add')}
+        >
+          Yeni Sınıf Ekle
         </button>
       </div>
 
-      <div className="classes-grid">
+      <div className="grid-container">
         {classes.map(classItem => (
-          <div key={classItem.id} className="class-card">
-            <div className="class-header">
-              <h3>{classItem.className}</h3>
-              <span className="category-badge">
-                {classItem.classCategory?.name}
-              </span>
-            </div>
-            <p className="class-description">{classItem.description}</p>
+          <div key={classItem.id} className="card">
+            <h2>{classItem.className}</h2>
             <div className="class-details">
               <p>
-                <strong>Eğitmen:</strong> {classItem.instructor?.firstName} {classItem.instructor?.lastName}
+                <span className="detail-label">Kategori:</span>
+                <span className="detail-value">{classItem.classCategory?.name}</span>
               </p>
               <p>
-                <strong>Saat:</strong> {classItem.startTime} - {classItem.endTime}
+                <span className="detail-label">Eğitmen:</span>
+                <span className="detail-value">
+                  {classItem.instructor?.firstName} {classItem.instructor?.lastName}
+                </span>
               </p>
-              {classItem.memberClasses && classItem.memberClasses.length > 0 && (
-                <p>
-                  <strong>Kayıtlı Üye Sayısı:</strong> {classItem.memberClasses.length}
-                </p>
+              <p>
+                <span className="detail-label">Saat:</span>
+                <span className="detail-value">
+                  {new Date(classItem.startTime).toLocaleTimeString()} - 
+                  {new Date(classItem.endTime).toLocaleTimeString()}
+                </span>
+              </p>
+              <p>
+                <span className="detail-label">Kapasite:</span>
+                <span className="detail-value">{classItem.capacity} Kişi</span>
+              </p>
+              {classItem.description && (
+                <p className="class-description">{classItem.description}</p>
               )}
             </div>
             <div className="card-actions">
               <button 
+                className="button button-secondary"
                 onClick={() => navigate(`/classes/edit/${classItem.id}`)}
-                className="edit-button"
               >
-                Düzenle
+                <i className="fas fa-edit"></i> Düzenle
               </button>
               <button 
+                className="button button-danger"
                 onClick={() => handleDelete(classItem.id)}
-                className="delete-button"
               >
-                Sil
+                <i className="fas fa-trash"></i> Sil
               </button>
             </div>
           </div>

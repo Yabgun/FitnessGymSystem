@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../services/axiosConfig';
-import './Instructors.css';
+import '../../styles/common.css';
 
 function InstructorsList() {
-  const navigate = useNavigate();
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchInstructors();
@@ -18,8 +17,8 @@ function InstructorsList() {
       const response = await axios.get('/api/Instructors');
       setInstructors(response.data);
       setLoading(false);
-    } catch (err) {
-      setError('Eğitmenler yüklenirken bir hata oluştu');
+    } catch (error) {
+      console.error('Error fetching instructors:', error);
       setLoading(false);
     }
   };
@@ -29,57 +28,50 @@ function InstructorsList() {
       try {
         await axios.delete(`/api/Instructors/${id}`);
         fetchInstructors();
-      } catch (err) {
-        setError('Eğitmen silinirken bir hata oluştu');
+      } catch (error) {
+        console.error('Error deleting instructor:', error);
       }
     }
   };
 
-  if (loading) return <div className="loading">Yükleniyor...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) {
+    return <div className="loading-spinner"></div>;
+  }
 
   return (
-    <div className="instructors-list-container">
-      <div className="list-header">
-        <h2>Eğitmenler</h2>
-        <button onClick={() => navigate('/instructors/add')} className="add-button">
-          Yeni Eğitmen
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Eğitmenler</h1>
+        <button 
+          className="button button-primary"
+          onClick={() => navigate('/instructors/add')}
+        >
+          <i className="fas fa-plus"></i> Yeni Eğitmen Ekle
         </button>
       </div>
 
-      <div className="instructors-grid">
+      <div className="grid-container">
         {instructors.map(instructor => (
-          <div key={instructor.id} className="instructor-card">
-            <div className="instructor-header">
-              <h3>{instructor.firstName} {instructor.lastName}</h3>
-              <span className="specialization-badge">
-                {instructor.specialty}
-              </span>
-            </div>
+          <div key={instructor.id} className="card">
+            <h2>{instructor.firstName} {instructor.lastName}</h2>
             <div className="instructor-details">
-              {instructor.classes && instructor.classes.length > 0 && (
-                <div className="instructor-classes">
-                  <strong>Verdiği Dersler:</strong>
-                  <ul>
-                    {instructor.classes.map(cls => (
-                      <li key={cls.id}>{cls.className}</li>
-                    ))}
-                  </ul>
-                </div>
+              <p><strong>Uzmanlık:</strong> {instructor.specialty}</p>
+              {instructor.classCategory && (
+                <p><strong>Kategori:</strong> {instructor.classCategory.name}</p>
               )}
             </div>
             <div className="card-actions">
               <button 
+                className="button button-secondary"
                 onClick={() => navigate(`/instructors/edit/${instructor.id}`)}
-                className="edit-button"
               >
-                Düzenle
+                <i className="fas fa-edit"></i> Düzenle
               </button>
               <button 
+                className="button button-danger"
                 onClick={() => handleDelete(instructor.id)}
-                className="delete-button"
               >
-                Sil
+                <i className="fas fa-trash"></i> Sil
               </button>
             </div>
           </div>

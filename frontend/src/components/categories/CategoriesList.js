@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../services/axiosConfig';
-import './Categories.css';
+import '../../styles/common.css';
 
 function CategoriesList() {
-  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -18,8 +17,8 @@ function CategoriesList() {
       const response = await axios.get('/api/ClassCategories');
       setCategories(response.data);
       setLoading(false);
-    } catch (err) {
-      setError('Kategoriler yüklenirken bir hata oluştu');
+    } catch (error) {
+      console.error('Error fetching categories:', error);
       setLoading(false);
     }
   };
@@ -29,39 +28,44 @@ function CategoriesList() {
       try {
         await axios.delete(`/api/ClassCategories/${id}`);
         fetchCategories();
-      } catch (err) {
-        setError('Kategori silinirken bir hata oluştu');
+      } catch (error) {
+        console.error('Error deleting category:', error);
       }
     }
   };
 
-  if (loading) return <div className="loading">Yükleniyor...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (loading) {
+    return <div className="page-container">Yükleniyor...</div>;
+  }
 
   return (
-    <div className="categories-list-container">
-      <div className="list-header">
-        <h2>Sınıf Kategorileri</h2>
-        <button onClick={() => navigate('/categories/add')} className="add-button">
-          Yeni Kategori
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Kategoriler</h1>
+        <button 
+          className="button button-primary"
+          onClick={() => navigate('/categories/add')}
+        >
+          Yeni Kategori Ekle
         </button>
       </div>
 
-      <div className="categories-grid">
+      <div className="grid-container">
         {categories.map(category => (
-          <div key={category.id} className="category-card">
-            <h3>{category.name}</h3>
+          <div key={category.id} className="card">
+            <h2>{category.name}</h2>
             <p>{category.description}</p>
+            
             <div className="card-actions">
               <button 
+                className="button button-secondary"
                 onClick={() => navigate(`/categories/edit/${category.id}`)}
-                className="edit-button"
               >
                 Düzenle
               </button>
               <button 
+                className="button button-danger"
                 onClick={() => handleDelete(category.id)}
-                className="delete-button"
               >
                 Sil
               </button>

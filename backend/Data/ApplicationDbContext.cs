@@ -11,29 +11,52 @@ namespace FitnessGymSystem.Data
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Member> Members { get; set; }
-        public DbSet<Instructor> Instructors { get; set; }
-        public DbSet<ClassCategory> ClassCategories { get; set; }
         public DbSet<Class> Classes { get; set; }
+        public DbSet<ClassCategory> ClassCategories { get; set; }
+        public DbSet<Instructor> Instructors { get; set; }
+        public DbSet<Member> Members { get; set; }
         public DbSet<MemberClass> MemberClasses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    // Member - Class Many-to-Many ilişki yapılandırması
-    modelBuilder.Entity<MemberClass>()
-        .HasKey(mc => new { mc.MemberId, mc.ClassId });
+        {
+            base.OnModelCreating(modelBuilder);
 
-    modelBuilder.Entity<Member>()
-        .HasMany(m => m.MemberClasses)
-        .WithOne(mc => mc.Member)
-        .HasForeignKey(mc => mc.MemberId);
+            // User konfigürasyonu
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasIndex(e => e.Username).IsUnique();
+                entity.HasIndex(e => e.Email).IsUnique();
+            });
 
-    modelBuilder.Entity<Class>()
-        .HasMany(c => c.MemberClasses)
-        .WithOne(mc => mc.Class)
-        .HasForeignKey(mc => mc.ClassId);
-}
+            // Member - Class ilişkisi (Many-to-Many)
+            modelBuilder.Entity<MemberClass>()
+                .HasKey(mc => new { mc.MemberId, mc.ClassId });
 
+            modelBuilder.Entity<MemberClass>()
+                .HasOne(mc => mc.Member)
+                .WithMany(m => m.MemberClasses)
+                .HasForeignKey(mc => mc.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<MemberClass>()
+                .HasOne(mc => mc.Class)
+                .WithMany(c => c.MemberClasses)
+                .HasForeignKey(mc => mc.ClassId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ClassCategory - Class ilişkisi (One-to-Many)
+            modelBuilder.Entity<Class>()
+                .HasOne(c => c.ClassCategory)
+                .WithMany(cc => cc.Classes)
+                .HasForeignKey(c => c.ClassCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Instructor - Class ilişkisi (One-to-Many)
+            modelBuilder.Entity<Class>()
+                .HasOne(c => c.Instructor)
+                .WithMany(i => i.Classes)
+                .HasForeignKey(c => c.InstructorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }
