@@ -1,95 +1,45 @@
-# .NET Core build outputs
-backend/[Bb]in/
-backend/[Oo]bj/
-backend/[Dd]ebug/
-backend/[Rr]elease/
+# Build outputs and binaries
+backend/**/[Bb]in/
+backend/**/[Oo]bj/
+backend/**/[Dd]ebug/
+backend/**/[Rr]elease/
+**/bin/
+**/obj/
 
-# Visual Studio files
-.vs/
-*.user
-*.userosscache
-*.suo
-*.userprefs
+# Generated files
+*.dll
+*.pdb
+*.cache
+*.editorconfig
+FitnessGymSystem.AssemblyInfo.cs
+FitnessGymSystem.GeneratedMSBuildEditorConfig.editorconfig
+FitnessGymSystem.AssemblyInfoInputs.cache
+FitnessGymSystem.assets.cache
+FitnessGymSystem.csproj.AssemblyReference.cache
+FitnessGymSystem.csproj.CoreCompileInputs.cache
+FitnessGymSystem.csproj.FileListAbsolute.txt
+FitnessGymSystem.genruntimeconfig.cache
+FitnessGymSystem.MvcApplicationPartsAssemblyInfo.cs
+FitnessGymSystem.sourcelink.json
+staticwebassets.build.json
+msbuild.build*.props
 
-# Build results
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Bb]in/
-[Oo]bj/
-
-# .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
-
-# Visual Studio Code
-.vscode/
-
-# Rider
-.idea/
-
-# User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# .NET Scaffolding
-ScaffoldingReadMe.txt
-
-# Visual Studio for Mac
-.vscode/
-.idea/
-*.userprefs
-*.usertasks
-
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-
-# Visual Studio cache/options directory
-.vs/
-
-# MSTest test Results
-[Tt]est[Rr]esult*/
-[Bb]uild[Ll]og.*
-
-# .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
-
-# ASP.NET Scaffolding
-ScaffoldingReadMe.txt
-
-# NuGet Packages
-*.nupkg
-# NuGet Symbol Packages
-*.snupkg
-# The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
-# except build/, which is used as an MSBuild target.
-!**/[Pp]ackages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/[Pp]ackages/repositories.config
-# NuGet v3's project.json files produces more ignorable files
+# NuGet
+project.assets.json
+project.nuget.cache
 *.nuget.props
 *.nuget.targets
+packages/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.usertasks
+.history/
 
 # Node.js / React
 node_modules/
@@ -99,6 +49,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+coverage/
 
 # Environment files
 .env
@@ -107,43 +58,22 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# macOS
+# OS generated files
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 ehthumbs.db
-ehthumbs_vista.db
+Thumbs.db
 
-# Cache and temp files
-*.cache
-*.tmp
-*.temp
-.history/
-
-# Project specific
-/backend/bin/
-/backend/obj/
-/frontend/build/
-/frontend/node_modules/
-
-# Sensitive configuration files
+# Sensitive configuration
 appsettings.Development.json
 *.Development.json
 *.Production.json
 *.Staging.json
 
-# Database files
+# Database
 *.db
 *.sqlite
 *.sqlite3
