@@ -30,8 +30,8 @@ namespace FitnessGymSystem.Controllers
                         c.Id,
                         c.ClassName,
                         c.Description,
-                        c.StartTime,
-                        c.EndTime,
+                        StartTime = c.StartTime.AddHours(3),
+                        EndTime = c.EndTime.AddHours(3),
                         c.Capacity,
                         c.DayOfWeek,
                         c.ClassCategoryId,
@@ -103,14 +103,14 @@ namespace FitnessGymSystem.Controllers
 
                 try
                 {
-                    // StartTime ve EndTime'ı UTC'ye çevir
-                    classModel.StartTime = DateTime.SpecifyKind(classModel.StartTime, DateTimeKind.Utc);
-                    classModel.EndTime = DateTime.SpecifyKind(classModel.EndTime, DateTimeKind.Utc);
+                    // StartTime ve EndTime'ı direkt olarak kaydet
+                    classModel.StartTime = classModel.StartTime;
+                    classModel.EndTime = classModel.EndTime;
 
                     // Navigation property'leri null olarak ayarla
                     classModel.ClassCategory = null;
                     classModel.Instructor = null;
-                    classModel.MemberClasses = null;  // MemberClasses'ı null olarak bırak
+                    classModel.MemberClasses = null;
 
                     // Veritabanına kaydet
                     _context.Classes.Add(classModel);
@@ -122,8 +122,8 @@ namespace FitnessGymSystem.Controllers
                         classModel.Id,
                         classModel.ClassName,
                         classModel.Description,
-                        StartTime = classModel.StartTime.ToLocalTime(),
-                        EndTime = classModel.EndTime.ToLocalTime(),
+                        StartTime = classModel.StartTime.AddHours(3),
+                        EndTime = classModel.EndTime.AddHours(3),
                         classModel.Capacity,
                         classModel.DayOfWeek,
                         classModel.ClassCategoryId,
@@ -171,9 +171,9 @@ namespace FitnessGymSystem.Controllers
             if (updated.Capacity < cls.MemberClasses.Count)
                 return BadRequest(new { message = "Yeni kapasite mevcut üye sayısından az olamaz." });
 
-            // Saatleri UTC olarak ayarla
-            updated.StartTime = DateTime.SpecifyKind(updated.StartTime, DateTimeKind.Utc);
-            updated.EndTime = DateTime.SpecifyKind(updated.EndTime, DateTimeKind.Utc);
+            // Saatleri direkt olarak kullan
+            updated.StartTime = updated.StartTime;
+            updated.EndTime = updated.EndTime;
 
             // Alanları güncelle
             cls.ClassName = updated.ClassName;
@@ -187,7 +187,21 @@ namespace FitnessGymSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(cls);
+            // Güncellenmiş veriyi döndür
+            var result = new
+            {
+                cls.Id,
+                cls.ClassName,
+                cls.Description,
+                StartTime = cls.StartTime.AddHours(3), // Saat farkını düzelt
+                EndTime = cls.EndTime.AddHours(3),     // Saat farkını düzelt
+                cls.Capacity,
+                cls.DayOfWeek,
+                cls.ClassCategoryId,
+                cls.InstructorId
+            };
+
+            return Ok(result);
         }
 
         // Var olan bir dersi sil
