@@ -22,7 +22,18 @@ namespace FitnessGymSystem.Controllers
         {
             try
             {
-                var instructors = await _context.Instructors.ToListAsync();
+                var instructors = await _context.Instructors
+                    .Include(i => i.ClassCategory)
+                    .Select(i => new {
+                        i.Id,
+                        i.FirstName,
+                        i.LastName,
+                        i.Specialty,
+                        i.ClassCategoryId,
+                        categoryName = i.ClassCategory != null ? i.ClassCategory.Name : null
+                    })
+                    .ToListAsync();
+
                 return Ok(instructors);
             }
             catch (Exception ex)

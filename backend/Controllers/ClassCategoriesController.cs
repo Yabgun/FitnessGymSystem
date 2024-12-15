@@ -38,7 +38,12 @@ namespace FitnessGymSystem.Controllers
             try
             {
                 var category = await _context.ClassCategories
-                    .Include(c => c.Classes)
+                    .AsNoTracking()
+                    .Select(c => new {
+                        c.Id,
+                        c.Name,
+                        c.Description
+                    })
                     .FirstOrDefaultAsync(c => c.Id == id);
 
                 if (category == null)

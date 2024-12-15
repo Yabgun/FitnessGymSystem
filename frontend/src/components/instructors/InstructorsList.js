@@ -56,9 +56,7 @@ function InstructorsList() {
             <h2>{instructor.firstName} {instructor.lastName}</h2>
             <div className="instructor-details">
               <p><strong>Uzmanlık:</strong> {instructor.specialty}</p>
-              {instructor.classCategory && (
-                <p><strong>Kategori:</strong> {instructor.classCategory.name}</p>
-              )}
+              <p><strong>Kategori:</strong> {instructor.categoryName || 'Belirtilmemiş'}</p>
             </div>
             <div className="card-actions">
               <button 

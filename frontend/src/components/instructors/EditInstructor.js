@@ -10,12 +10,15 @@ function EditInstructor() {
     firstName: '',
     lastName: '',
     specialty: '',
+    classCategoryId: 0,
     classes: []
   });
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
     fetchInstructor();
+    fetchCategories();
   }, [id]);
 
   const fetchInstructor = async () => {
@@ -24,6 +27,15 @@ function EditInstructor() {
       setInstructor(response.data);
     } catch (err) {
       setError('Eğitmen bilgileri yüklenirken bir hata oluştu');
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('/api/ClassCategories');
+      setCategories(response.data);
+    } catch (err) {
+      console.error('Kategoriler yüklenirken hata:', err);
     }
   };
 
@@ -71,6 +83,21 @@ function EditInstructor() {
             onChange={(e) => setInstructor({...instructor, specialty: e.target.value})}
             required
           />
+        </div>
+
+        <div className="form-group">
+          <label>Uzmanlık Kategorisi</label>
+          <select
+            value={instructor.classCategoryId || ''}
+            onChange={(e) => setInstructor({...instructor, classCategoryId: parseInt(e.target.value) || 0})}
+          >
+            <option value="">Kategori Seçin</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {instructor.classes && instructor.classes.length > 0 && (
