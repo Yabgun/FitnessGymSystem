@@ -78,36 +78,77 @@ namespace FitnessGymSystem.Controllers
 
             try
             {
-                // Saatleri UTC olarak ayarla
-                classModel.StartTime = DateTime.SpecifyKind(classModel.StartTime, DateTimeKind.Utc);
-                classModel.EndTime = DateTime.SpecifyKind(classModel.EndTime, DateTimeKind.Utc);
-
-                // Navigation property'leri null olarak ayarla
-                classModel.ClassCategory = null;
-                classModel.Instructor = null;
-                classModel.MemberClasses = new List<MemberClass>();
-
-                _context.Classes.Add(classModel);
-                await _context.SaveChangesAsync();
-
-                // Yeni eklenen sınıfı döndür
-                var result = new
+                // Null kontrolü
+                if (string.IsNullOrEmpty(classModel.ClassName))
                 {
-                    classModel.Id,
-                    classModel.ClassName,
-                    classModel.Description,
-                    classModel.StartTime,
-                    classModel.EndTime,
-                    classModel.Capacity,
-                    classModel.ClassCategoryId,
-                    classModel.InstructorId
-                };
+                    return BadRequest(new { message = "Sınıf adı boş olamaz." });
+                }
 
-                return Ok(new { message = "Sınıf başarıyla eklendi", data = result });
+                // Description null ise boş string ata
+                classModel.Description = classModel.Description ?? "";
+
+                // Kategori ve eğitmen kontrolü
+                var category = await _context.ClassCategories.FindAsync(classModel.ClassCategoryId);
+                var instructor = await _context.Instructors.FindAsync(classModel.InstructorId);
+
+                if (category == null)
+                {
+                    return BadRequest(new { message = "Seçilen kategori bulunamadı." });
+                }
+
+                if (instructor == null)
+                {
+                    return BadRequest(new { message = "Seçilen eğitmen bulunamadı." });
+                }
+
+                try
+                {
+                    // StartTime ve EndTime'ı UTC'ye çevir
+                    classModel.StartTime = DateTime.SpecifyKind(classModel.StartTime, DateTimeKind.Utc);
+                    classModel.EndTime = DateTime.SpecifyKind(classModel.EndTime, DateTimeKind.Utc);
+
+                    // Navigation property'leri null olarak ayarla
+                    classModel.ClassCategory = null;
+                    classModel.Instructor = null;
+                    classModel.MemberClasses = null;  // MemberClasses'ı null olarak bırak
+
+                    // Veritabanına kaydet
+                    _context.Classes.Add(classModel);
+                    await _context.SaveChangesAsync();
+
+                    // Yeni eklenen sınıfı döndür
+                    var result = new
+                    {
+                        classModel.Id,
+                        classModel.ClassName,
+                        classModel.Description,
+                        StartTime = classModel.StartTime.ToLocalTime(),
+                        EndTime = classModel.EndTime.ToLocalTime(),
+                        classModel.Capacity,
+                        classModel.DayOfWeek,
+                        classModel.ClassCategoryId,
+                        classModel.InstructorId
+                    };
+
+                    return Ok(new { message = "Sınıf başarıyla eklendi", data = result });
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    Console.WriteLine($"Veritabanı Hatası: {dbEx.Message}");
+                    Console.WriteLine($"İç Hata: {dbEx.InnerException?.Message}");
+                    return StatusCode(500, new { message = "Sınıf eklenirken bir hata oluştu", error = dbEx.InnerException?.Message ?? dbEx.Message });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Genel Hata: {ex.Message}");
+                    Console.WriteLine($"İç Hata: {ex.InnerException?.Message}");
+                    return StatusCode(500, new { message = "Sınıf eklenirken bir hata oluştu", error = ex.Message });
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hata: {ex.Message}");
+                Console.WriteLine($"Genel Hata: {ex.Message}");
+                Console.WriteLine($"İç Hata: {ex.InnerException?.Message}");
                 return StatusCode(500, new { message = "Sınıf eklenirken bir hata oluştu", error = ex.Message });
             }
         }
