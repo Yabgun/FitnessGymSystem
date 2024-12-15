@@ -2,14 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace FitnessGymSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] // Şimdilik kaldırıyoruz
     public class MembersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,20 +16,34 @@ namespace FitnessGymSystem.Controllers
             _context = context;
         }
 
-        // Tüm üyeleri getir
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Member>>> GetMembers()
+        public async Task<IActionResult> GetAll()
         {
-            var members = await _context.Members
-                .Include(m => m.MemberClasses)
-                    .ThenInclude(mc => mc.Class)
-                .ToListAsync();
-            return Ok(members);
+            try
+            {
+                var members = await _context.Members
+                    .Select(m => new
+                    {
+                        id = m.Id,
+                        firstName = m.FirstName,
+                        lastName = m.LastName,
+                        email = m.Email,
+                        phone = m.Phone,
+                        address = m.Address
+                    })
+                    .ToListAsync();
+
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hata: {ex.Message}");
+                return StatusCode(500, new { message = "Üyeler yüklenirken bir hata oluştu" });
+            }
         }
 
-        // Belirli bir üyeyi getir
         [HttpGet("{id}")]
-        public async Task<ActionResult<Member>> GetMember(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var member = await _context.Members
                 .Include(m => m.MemberClasses)
@@ -41,59 +52,57 @@ namespace FitnessGymSystem.Controllers
 
             if (member == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Üye bulunamadı" });
             }
 
-            return member;
+            return Ok(member);
         }
 
-        // Yeni üye ekle
         [HttpPost]
-        public async Task<ActionResult<Member>> CreateMember(Member member)
+        public async Task<IActionResult> Create([FromBody] Member member)
         {
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
+            try
+            {
+                _context.Members.Add(member);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetById), new { id = member.Id }, member);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Üye eklenirken bir hata oluştu", error = ex.Message });
+            }
         }
 
-        // Üye güncelle
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMember(int id, [FromBody] Member member)
+        public async Task<IActionResult> Update(int id, [FromBody] Member member)
         {
-            try 
+            if (id != member.Id)
             {
-                var existingMember = await _context.Members
-                    .Include(m => m.MemberClasses)
-                    .FirstOrDefaultAsync(m => m.Id == id);
+                return BadRequest(new { message = "ID'ler eşleşmiyor" });
+            }
 
+            try
+            {
+                var existingMember = await _context.Members.FindAsync(id);
                 if (existingMember == null)
                 {
                     return NotFound(new { message = "Üye bulunamadı" });
                 }
 
-                // Temel bilgileri güncelle
                 existingMember.FirstName = member.FirstName;
                 existingMember.LastName = member.LastName;
-                existingMember.DateOfBirth = member.DateOfBirth;
-
-                // Mevcut sınıf kayıtlarını güncelle
-                if (existingMember.MemberClasses != null)
-                {
-                    _context.MemberClasses.RemoveRange(existingMember.MemberClasses);
-                }
-
-                if (member.MemberClasses != null)
-                {
-                    foreach (var memberClass in member.MemberClasses)
-                    {
-                        memberClass.MemberId = id;
-                        _context.MemberClasses.Add(memberClass);
-                    }
-                }
+                existingMember.Email = member.Email;
+                existingMember.Phone = member.Phone;
+                existingMember.Address = member.Address;
 
                 await _context.SaveChangesAsync();
-                return Ok(existingMember);
+                return Ok(new { message = "Üye başarıyla güncellendi" });
             }
             catch (Exception ex)
             {
@@ -101,24 +110,34 @@ namespace FitnessGymSystem.Controllers
             }
         }
 
-        // Üye sil
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMember(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var member = await _context.Members
-                .Include(m => m.MemberClasses)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (member == null)
+            try
             {
-                return NotFound();
+                var member = await _context.Members
+                    .Include(m => m.MemberClasses)
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (member == null)
+                {
+                    return NotFound(new { message = "Üye bulunamadı" });
+                }
+
+                if (member.MemberClasses?.Any() == true)
+                {
+                    _context.MemberClasses.RemoveRange(member.MemberClasses);
+                }
+
+                _context.Members.Remove(member);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Üye başarıyla silindi" });
             }
-
-            _context.MemberClasses.RemoveRange(member.MemberClasses);
-            _context.Members.Remove(member);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Üye silinirken bir hata oluştu", error = ex.Message });
+            }
         }
     }
 }

@@ -11,7 +11,8 @@ function AddClass() {
     endTime: '',
     capacity: '',
     classCategoryId: '',
-    instructorId: ''
+    instructorId: '',
+    dayOfWeek: ''
   });
   const [categories, setCategories] = useState([]);
   const [instructors, setInstructors] = useState([]);
@@ -44,6 +45,16 @@ function AddClass() {
     fetchData();
   }, []);
 
+  const daysOfWeek = [
+    { value: 0, label: 'Pazar' },
+    { value: 1, label: 'Pazartesi' },
+    { value: 2, label: 'Salı' },
+    { value: 3, label: 'Çarşamba' },
+    { value: 4, label: 'Perşembe' },
+    { value: 5, label: 'Cuma' },
+    { value: 6, label: 'Cumartesi' }
+  ];
+
   const validateForm = () => {
     if (!classData.className.trim()) {
       setError('Sınıf adı zorunludur.');
@@ -73,58 +84,40 @@ function AddClass() {
       setError('Kapasite 1-50 arası olmalıdır.');
       return false;
     }
+    if (!classData.dayOfWeek) {
+      setError('Gün seçimi zorunludur.');
+      return false;
+    }
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
     try {
-      if (!validateForm()) {
-        setLoading(false);
-        return;
-      }
+        if (!validateForm()) {
+            return;
+        }
 
-      // Tarih ve saat formatını düzenleme
-      const today = new Date().toISOString().split('T')[0];
-      const [startHours, startMinutes] = classData.startTime.split(':');
-      const [endHours, endMinutes] = classData.endTime.split(':');
-      
-      const startTime = new Date(`${today}T${startHours}:${startMinutes}:00`);
-      const endTime = new Date(`${today}T${endHours}:${endMinutes}:00`);
+        const [startHours, startMinutes] = classData.startTime.split(':');
+        const [endHours, endMinutes] = classData.endTime.split(':');
 
-      const formattedData = {
-        className: classData.className.trim(),
-        description: classData.description || "",
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
-        capacity: parseInt(classData.capacity),
-        instructorId: parseInt(classData.instructorId),
-        classCategoryId: parseInt(classData.classCategoryId),
-        memberClasses: []
-      };
+        const formattedData = {
+            ...classData,
+            startTime: `${startHours}:${startMinutes}:00`,
+            endTime: `${endHours}:${endMinutes}:00`,
+            capacity: parseInt(classData.capacity),
+            classCategoryId: parseInt(classData.classCategoryId),
+            instructorId: parseInt(classData.instructorId),
+            dayOfWeek: parseInt(classData.dayOfWeek)
+        };
 
-      console.log('Gönderilecek veri:', formattedData);
+        console.log('Gönderilen veri:', formattedData);
 
-      const response = await axios.post('/api/Classes', formattedData);
-      console.log('Sunucu yanıtı:', response.data);
-      
-      navigate('/classes');
+        await axios.post('/api/Classes', formattedData);
+        navigate('/classes');
     } catch (err) {
-      console.error('Sınıf eklenirken hata:', err);
-      console.error('Hata detayı:', err.response?.data);
-      
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Sınıf eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
-      }
-    } finally {
-      setLoading(false);
+        setError(err.response?.data?.message || 'Sınıf eklenirken bir hata oluştu.');
     }
   };
 
@@ -162,9 +155,11 @@ function AddClass() {
             required
             disabled={loading}
           >
-            <option value="">Seçiniz</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            <option key="select-category" value="">Seçiniz</option>
+            {categories && categories.map((cat, index) => (
+              <option key={`cat-${cat.id || index}`} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </div>
@@ -177,9 +172,9 @@ function AddClass() {
             required
             disabled={loading}
           >
-            <option value="">Seçiniz</option>
-            {instructors.map(inst => (
-              <option key={inst.id} value={inst.id}>
+            <option key="select-instructor" value="">Seçiniz</option>
+            {instructors && instructors.map((inst, index) => (
+              <option key={`inst-${inst.id || index}`} value={inst.id}>
                 {inst.firstName} {inst.lastName}
               </option>
             ))}
@@ -232,6 +227,22 @@ function AddClass() {
             maxLength={500}
             placeholder="Sınıf hakkında açıklama girin"
           />
+        </div>
+
+        <div className="form-group">
+          <label>Gün: *</label>
+          <select
+            value={classData.dayOfWeek}
+            onChange={(e) => setClassData({...classData, dayOfWeek: parseInt(e.target.value)})}
+            required
+          >
+            <option key="select-day" value="">Gün Seçin</option>
+            {daysOfWeek && daysOfWeek.map((day, index) => (
+              <option key={`day-${day.value || index}`} value={day.value}>
+                {day.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-actions">

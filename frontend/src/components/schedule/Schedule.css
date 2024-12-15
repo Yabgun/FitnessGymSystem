@@ -1,54 +1,52 @@
 .schedule-container {
   padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .schedule-grid {
   display: flex;
-  overflow-x: auto;
-  border: 1px solid #ddd;
-  background: white;
+  min-width: 1000px;
 }
 
 .time-column, .day-column {
-  min-width: 150px;
-}
-
-.time-column {
-  background: #f5f5f5;
+  flex: 1;
+  min-width: 120px;
 }
 
 .header-cell {
+  background-color: #f5f5f5;
   padding: 10px;
-  font-weight: bold;
   text-align: center;
-  background: #2c3e50;
-  color: white;
-  position: sticky;
-  top: 0;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .time-cell {
   padding: 10px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
-  height: 80px;
+  border: 1px solid #ddd;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .schedule-cell {
+  border: 1px solid #ddd;
+  height: 60px;
   padding: 5px;
-  border-bottom: 1px solid #ddd;
-  border-left: 1px solid #ddd;
-  height: 80px;
   position: relative;
 }
 
 .class-item {
-  background: #3498db;
-  color: white;
-  padding: 5px;
+  background-color: #e3f2fd;
   border-radius: 4px;
+  padding: 5px;
   font-size: 0.9em;
   height: 100%;
   display: flex;
@@ -58,27 +56,32 @@
 
 .class-name {
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
-.class-details {
-  display: flex;
-  flex-direction: column;
+.class-time {
   font-size: 0.8em;
+  color: #666;
 }
 
-.error {
-  color: red;
-  padding: 20px;
-  text-align: center;
+.class-instructor {
+  font-size: 0.8em;
+  color: #666;
+  font-style: italic;
 }
 
+/* Responsive tasarım için */
 @media (max-width: 768px) {
-  .schedule-grid {
-    font-size: 0.9em;
+  .schedule-container {
+    padding: 10px;
   }
 
   .time-column, .day-column {
-    min-width: 120px;
+    min-width: 100px;
+  }
+
+  .header-cell, .time-cell, .schedule-cell {
+    padding: 5px;
+    font-size: 0.9em;
   }
 } 

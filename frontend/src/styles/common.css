@@ -301,4 +301,26 @@ body {
 
 .auth-tab:hover {
     color: var(--primary-color);
+}
+
+.error-message {
+  color: #e74c3c;
+  text-align: center;
+  padding: 20px;
+  background-color: #fde8e8;
+  border-radius: 4px;
+  margin: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #3498db;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+  font-style: italic;
 } 

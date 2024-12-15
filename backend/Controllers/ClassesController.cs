@@ -23,6 +23,50 @@ namespace FitnessGymSystem.Controllers
             try
             {
                 var classes = await _context.Classes
+                    .Include(c => c.ClassCategory)
+                    .Include(c => c.Instructor)
+                    .Select(c => new
+                    {
+                        c.Id,
+                        c.ClassName,
+                        c.Description,
+                        c.StartTime,
+                        c.EndTime,
+                        c.Capacity,
+                        c.DayOfWeek,
+                        c.ClassCategoryId,
+                        c.InstructorId,
+                        Category = c.ClassCategory != null ? new { 
+                            Id = c.ClassCategory.Id, 
+                            Name = c.ClassCategory.Name 
+                        } : null,
+                        Instructor = c.Instructor != null ? new { 
+                            Id = c.Instructor.Id, 
+                            FirstName = c.Instructor.FirstName, 
+                            LastName = c.Instructor.LastName 
+                        } : null
+                    })
+                    .ToListAsync();
+
+                return Ok(classes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hata: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Sınıflar yüklenirken bir hata oluştu", error = ex.Message });
+            }
+        }
+
+        // Belirli bir dersi ID ile getir
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                var cls = await _context.Classes
+                    .Include(c => c.ClassCategory)
+                    .Include(c => c.Instructor)
                     .Select(c => new
                     {
                         c.Id,
@@ -33,35 +77,27 @@ namespace FitnessGymSystem.Controllers
                         c.Capacity,
                         c.ClassCategoryId,
                         c.InstructorId,
-                        Category = new { c.ClassCategory.Id, c.ClassCategory.Name },
-                        Instructor = new { c.Instructor.Id, c.Instructor.FirstName, c.Instructor.LastName }
+                        Category = new { 
+                            Id = c.ClassCategory.Id, 
+                            Name = c.ClassCategory.Name 
+                        },
+                        Instructor = new { 
+                            Id = c.Instructor.Id, 
+                            FirstName = c.Instructor.FirstName, 
+                            LastName = c.Instructor.LastName 
+                        }
                     })
-                    .ToListAsync();
+                    .FirstOrDefaultAsync(c => c.Id == id);
 
-                return Ok(classes);
+                if (cls == null)
+                    return NotFound(new { message = "Sınıf bulunamadı." });
+
+                return Ok(cls);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hata: {ex.Message}");
-                return StatusCode(500, new { message = "Sınıflar yüklenirken bir hata oluştu" });
+                return StatusCode(500, new { message = "Sınıf yüklenirken bir hata oluştu", error = ex.Message });
             }
-        }
-
-        // Belirli bir dersi ID ile getir
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var cls = await _context.Classes
-                .Include(c => c.ClassCategory)
-                .Include(c => c.Instructor)
-                .Include(c => c.MemberClasses)
-                    .ThenInclude(mc => mc.Member)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (cls == null)
-                return NotFound(new { message = "Ders bulunamadı." });
-
-            return Ok(cls);
         }
 
         // Yeni bir ders oluştur
@@ -75,15 +111,15 @@ namespace FitnessGymSystem.Controllers
 
             try
             {
-                // Navigation property'leri null olarak ayarla
-                classModel.ClassCategory = null;
-                classModel.Instructor = null;
-                classModel.MemberClasses = new List<MemberClass>();
+                // Saat formatını kontrol et
+                if (string.IsNullOrEmpty(classModel.StartTime) || string.IsNullOrEmpty(classModel.EndTime))
+                {
+                    return BadRequest(new { message = "Başlangıç ve bitiş saatleri gereklidir." });
+                }
 
                 _context.Classes.Add(classModel);
                 await _context.SaveChangesAsync();
 
-                // Yeni eklenen sınıfı döndür
                 var result = new
                 {
                     classModel.Id,
@@ -110,31 +146,81 @@ namespace FitnessGymSystem.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] Class updated)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                return BadRequest(new { message = "Geçersiz form verisi", errors = ModelState });
+            }
 
-            var cls = await _context.Classes
-                .Include(c => c.MemberClasses)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            try
+            {
+                var cls = await _context.Classes
+                    .Include(c => c.MemberClasses)
+                    .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (cls == null)
-                return NotFound(new { message = "Ders bulunamadı." });
+                if (cls == null)
+                {
+                    return NotFound(new { message = "Sınıf bulunamadı." });
+                }
 
-            // Kapasite kontrolü - mevcut üye sayısından az olamaz
-            if (updated.Capacity < cls.MemberClasses.Count)
-                return BadRequest(new { message = "Yeni kapasite mevcut üye sayısından az olamaz." });
+                // Saat formatını kontrol et
+                if (string.IsNullOrEmpty(updated.StartTime) || string.IsNullOrEmpty(updated.EndTime))
+                {
+                    return BadRequest(new { message = "Başlangıç ve bitiş saatleri gereklidir." });
+                }
 
-            // Alanları güncelle
-            cls.ClassName = updated.ClassName;
-            cls.Description = updated.Description;
-            cls.StartTime = updated.StartTime;
-            cls.EndTime = updated.EndTime;
-            cls.Capacity = updated.Capacity;
-            cls.ClassCategoryId = updated.ClassCategoryId;
-            cls.InstructorId = updated.InstructorId;
+                // Kapasite kontrolü
+                if (updated.Capacity < (cls.MemberClasses?.Count ?? 0))
+                {
+                    return BadRequest(new { message = "Yeni kapasite mevcut üye sayısından az olamaz." });
+                }
 
-            await _context.SaveChangesAsync();
+                // Eğitmen ve kategori kontrolü
+                var instructor = await _context.Instructors.FindAsync(updated.InstructorId);
+                var category = await _context.ClassCategories.FindAsync(updated.ClassCategoryId);
 
-            return Ok(cls);
+                if (instructor == null)
+                {
+                    return BadRequest(new { message = "Geçersiz eğitmen seçimi" });
+                }
+
+                if (category == null)
+                {
+                    return BadRequest(new { message = "Geçersiz kategori seçimi" });
+                }
+
+                // Alanları güncelle
+                cls.ClassName = updated.ClassName;
+                cls.Description = updated.Description;
+                cls.StartTime = updated.StartTime;
+                cls.EndTime = updated.EndTime;
+                cls.Capacity = updated.Capacity;
+                cls.ClassCategoryId = updated.ClassCategoryId;
+                cls.InstructorId = updated.InstructorId;
+                cls.DayOfWeek = updated.DayOfWeek;
+
+                await _context.SaveChangesAsync();
+
+                var result = new
+                {
+                    cls.Id,
+                    cls.ClassName,
+                    cls.Description,
+                    cls.StartTime,
+                    cls.EndTime,
+                    cls.Capacity,
+                    cls.ClassCategoryId,
+                    cls.InstructorId,
+                    cls.DayOfWeek,
+                    Category = new { category.Id, category.Name },
+                    Instructor = new { instructor.Id, instructor.FirstName, instructor.LastName }
+                };
+
+                return Ok(new { message = "Sınıf başarıyla güncellendi", data = result });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Güncelleme hatası: {ex.Message}");
+                return StatusCode(500, new { message = "Sınıf güncellenirken bir hata oluştu", error = ex.Message });
+            }
         }
 
         // Var olan bir dersi sil

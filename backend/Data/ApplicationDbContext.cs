@@ -8,6 +8,16 @@ namespace FitnessGymSystem.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            try
+            {
+                Database.CanConnect();
+                Console.WriteLine("Veritabanı bağlantısı başarılı!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Veritabanı bağlantı hatası: {ex.Message}");
+                throw;
+            }
         }
 
         public DbSet<User> Users { get; set; }
@@ -57,6 +67,17 @@ namespace FitnessGymSystem.Data
                 .WithMany(i => i.Classes)
                 .HasForeignKey(c => c.InstructorId)
                 .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                var connectionString = "Server=localhost;Database=fitnessgym;User=root;Password=zxcASDqwe412586!=;AllowZeroDateTime=True;Convert Zero Datetime=True;CharSet=utf8mb4;";
+                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            }
+            
+            optionsBuilder.EnableSensitiveDataLogging();
         }
     }
 }

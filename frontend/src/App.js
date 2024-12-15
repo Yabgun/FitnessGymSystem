@@ -18,6 +18,7 @@ import AddInstructor from './components/instructors/AddInstructor';
 import EditInstructor from './components/instructors/EditInstructor';
 import Schedule from './components/schedule/Schedule';
 import EditMember from './components/members/EditMember';
+import EditClass from './components/classes/EditClass';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,123 +76,94 @@ function App() {
       <Navbar isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} />
       <div className="main-content">
         <Routes>
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/" /> : 
-                <Auth onLoginSuccess={handleLoginSuccess} />
-            } 
-          />
-
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <Dashboard user={user} />
-              </ProtectedRoute>
-            } 
-          />
-
-          {/* Korumalı rotalar */}
-          <Route
-            path="/members"
-            element={
-              <ProtectedRoute>
-                <MembersList />
-              </ProtectedRoute>
+          {[
+            {
+              path: "/login",
+              element: isAuthenticated ? <Navigate to="/" /> : <Auth onLoginSuccess={handleLoginSuccess} />,
+              key: "login"
+            },
+            {
+              path: "/",
+              element: <ProtectedRoute><Dashboard user={user} /></ProtectedRoute>,
+              key: "dashboard"
+            },
+            {
+              path: "/members",
+              element: <ProtectedRoute><MembersList /></ProtectedRoute>,
+              key: "members"
+            },
+            {
+              path: "/members/add",
+              element: <ProtectedRoute><AddMember /></ProtectedRoute>,
+              key: "add-member"
+            },
+            {
+              path: "/members/edit/:id",
+              element: <ProtectedRoute><EditMember /></ProtectedRoute>,
+              key: "edit-member"
+            },
+            {
+              path: "/categories",
+              element: <ProtectedRoute><CategoriesList /></ProtectedRoute>,
+              key: "categories"
+            },
+            {
+              path: "/categories/add",
+              element: <ProtectedRoute><AddCategory /></ProtectedRoute>,
+              key: "add-category"
+            },
+            {
+              path: "/categories/edit/:id",
+              element: <ProtectedRoute><EditCategory /></ProtectedRoute>,
+              key: "edit-category"
+            },
+            {
+              path: "/classes",
+              element: <ProtectedRoute><ClassesList /></ProtectedRoute>,
+              key: "classes"
+            },
+            {
+              path: "/classes/add",
+              element: <ProtectedRoute><AddClass /></ProtectedRoute>,
+              key: "add-class"
+            },
+            {
+              path: "/classes/edit/:id",
+              element: <ProtectedRoute><EditClass /></ProtectedRoute>,
+              key: "edit-class"
+            },
+            {
+              path: "/instructors",
+              element: <ProtectedRoute><InstructorsList /></ProtectedRoute>,
+              key: "instructors"
+            },
+            {
+              path: "/instructors/add",
+              element: <ProtectedRoute><AddInstructor /></ProtectedRoute>,
+              key: "add-instructor"
+            },
+            {
+              path: "/instructors/edit/:id",
+              element: <ProtectedRoute><EditInstructor /></ProtectedRoute>,
+              key: "edit-instructor"
+            },
+            {
+              path: "/schedule",
+              element: <ProtectedRoute><Schedule /></ProtectedRoute>,
+              key: "schedule"
+            },
+            {
+              path: "*",
+              element: <Navigate to="/" replace />,
+              key: "default"
             }
-          />
-          <Route
-            path="/members/add"
-            element={
-              <ProtectedRoute>
-                <AddMember />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/members/edit/:id"
-            element={
-              <ProtectedRoute>
-                <EditMember />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/categories"
-            element={
-              <ProtectedRoute>
-                <CategoriesList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/categories/add"
-            element={
-              <ProtectedRoute>
-                <AddCategory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/categories/edit/:id"
-            element={
-              <ProtectedRoute>
-                <EditCategory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/classes"
-            element={
-              <ProtectedRoute>
-                <ClassesList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/classes/add"
-            element={
-              <ProtectedRoute>
-                <AddClass />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/instructors"
-            element={
-              <ProtectedRoute>
-                <InstructorsList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/instructors/add"
-            element={
-              <ProtectedRoute>
-                <AddInstructor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/instructors/edit/:id"
-            element={
-              <ProtectedRoute>
-                <EditInstructor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/schedule"
-            element={
-              <ProtectedRoute>
-                <Schedule />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
+          ].map(route => (
+            <Route
+              key={route.key}
+              path={route.path}
+              element={route.element}
+            />
+          ))}
         </Routes>
       </div>
     </div>

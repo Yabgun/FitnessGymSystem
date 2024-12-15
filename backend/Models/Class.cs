@@ -16,14 +16,17 @@ namespace FitnessGymSystem.Models
         public string Description { get; set; }
 
         [Required]
-        public DateTime StartTime { get; set; }
+        public string StartTime { get; set; }
 
         [Required]
-        public DateTime EndTime { get; set; }
+        public string EndTime { get; set; }
 
         [Required]
         [Range(1, 50)]
         public int Capacity { get; set; }
+
+        [Required]
+        public DayOfWeek DayOfWeek { get; set; }
 
         public int ClassCategoryId { get; set; }
         [JsonIgnore]

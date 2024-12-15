@@ -48,73 +48,67 @@ function AddMember() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Yeni Üye Ekle</h1>
-      </div>
+    <div className="form-container">
+      <h2>Yeni Üye Ekle</h2>
+      {error && <div className="error-message">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Ad</label>
+          <input
+            type="text"
+            value={member.firstName}
+            onChange={(e) => setMember({...member, firstName: e.target.value})}
+            required
+          />
+        </div>
 
-      <div className="form-container">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Ad</label>
-            <input
-              type="text"
-              value={member.firstName}
-              onChange={(e) => setMember({...member, firstName: e.target.value})}
-              required
-            />
-          </div>
+        <div className="form-group">
+          <label>Soyad</label>
+          <input
+            type="text"
+            value={member.lastName}
+            onChange={(e) => setMember({...member, lastName: e.target.value})}
+            required
+          />
+        </div>
 
-          <div className="form-group">
-            <label>Soyad</label>
-            <input
-              type="text"
-              value={member.lastName}
-              onChange={(e) => setMember({...member, lastName: e.target.value})}
-              required
-            />
-          </div>
+        <div className="form-group">
+          <label>Doğum Tarihi</label>
+          <input
+            type="date"
+            value={member.dateOfBirth}
+            onChange={(e) => setMember({...member, dateOfBirth: e.target.value})}
+            required
+          />
+        </div>
 
-          <div className="form-group">
-            <label>Doğum Tarihi</label>
-            <input
-              type="date"
-              value={member.dateOfBirth}
-              onChange={(e) => setMember({...member, dateOfBirth: e.target.value})}
-              required
-            />
+        <div className="form-group">
+          <label>Katılacağı Sınıflar</label>
+          <div className="checkbox-group">
+            {classes && classes.map((cls, index) => (
+              <div key={`class-${cls.id || index}`} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id={`class-${cls.id || index}`}
+                  value={cls.id}
+                  checked={member.selectedClasses.includes(cls.id)}
+                  onChange={handleClassChange}
+                />
+                <label htmlFor={`class-${cls.id || index}`}>{cls.className}</label>
+              </div>
+            ))}
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>Katılacağı Sınıflar</label>
-            <div className="checkbox-group">
-              {classes.map(cls => (
-                <div key={cls.id} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    value={cls.id}
-                    onChange={handleClassChange}
-                  />
-                  <label>{cls.className}</label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button type="submit" className="button button-primary">
-              Kaydet
-            </button>
-            <button 
-              type="button" 
-              className="button button-secondary"
-              onClick={() => navigate('/members')}
-            >
-              İptal
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="form-actions">
+          <button type="button" onClick={() => navigate('/members')} className="button button-secondary">
+            İptal
+          </button>
+          <button type="submit" className="button button-primary">
+            Kaydet
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

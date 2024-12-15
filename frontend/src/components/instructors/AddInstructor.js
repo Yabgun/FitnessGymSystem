@@ -91,9 +91,11 @@ function AddInstructor() {
               value={instructor.classCategoryId || ''}
               onChange={(e) => setInstructor({...instructor, classCategoryId: e.target.value})}
             >
-              <option value="">Seçiniz</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key="select-category" value="">Seçiniz</option>
+              {categories && categories.map((cat, index) => (
+                <option key={`cat-${cat.id || index}`} value={cat.id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
           </div>
