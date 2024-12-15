@@ -25,6 +25,9 @@ namespace FitnessGymSystem.Models
         [Range(1, 50)]
         public int Capacity { get; set; }
 
+        [Required]
+        public DayOfWeek DayOfWeek { get; set; }
+
         public int ClassCategoryId { get; set; }
         [JsonIgnore]
         public virtual ClassCategory? ClassCategory { get; set; }

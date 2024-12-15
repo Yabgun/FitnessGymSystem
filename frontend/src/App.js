@@ -13,6 +13,7 @@ import AddCategory from './components/categories/AddCategory';
 import EditCategory from './components/categories/EditCategory';
 import ClassesList from './components/classes/ClassesList';
 import AddClass from './components/classes/AddClass';
+import EditClass from './components/classes/EditClass';
 import InstructorsList from './components/instructors/InstructorsList';
 import AddInstructor from './components/instructors/AddInstructor';
 import EditInstructor from './components/instructors/EditInstructor';
@@ -155,6 +156,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AddClass />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classes/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditClass />
               </ProtectedRoute>
             }
           />

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../services/axiosConfig';
 import './Classes.css';
 
-function AddClass() {
+function EditClass() {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [classData, setClassData] = useState({
     className: '',
     description: '',
@@ -17,8 +19,7 @@ function AddClass() {
   const [categories, setCategories] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   // Saat ve dakika seçenekleri için state'ler
   const [startHour, setStartHour] = useState('');
@@ -58,28 +59,44 @@ function AddClass() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
-        const [categoriesRes, instructorsRes] = await Promise.all([
+        const [classResponse, categoriesRes, instructorsRes] = await Promise.all([
+          axios.get(`/api/Classes/${id}`),
           axios.get('/api/ClassCategories'),
           axios.get('/api/Instructors')
         ]);
-        
-        console.log('Kategoriler:', categoriesRes.data);
-        console.log('Eğitmenler:', instructorsRes.data);
+
+        const classItem = classResponse.data;
+        const startDate = new Date(classItem.startTime);
+        const endDate = new Date(classItem.endTime);
+
+        // Saat ve dakika değerlerini ayarla
+        setStartHour(String(startDate.getHours()).padStart(2, '0'));
+        setStartMinute(String(startDate.getMinutes()).padStart(2, '0'));
+        setEndHour(String(endDate.getHours()).padStart(2, '0'));
+        setEndMinute(String(endDate.getMinutes()).padStart(2, '0'));
+
+        setClassData({
+          ...classItem,
+          startTime: `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`,
+          endTime: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
+          classCategoryId: classItem.classCategoryId.toString(),
+          instructorId: classItem.instructorId.toString(),
+          dayOfWeek: classItem.dayOfWeek.toString()
+        });
         
         setCategories(categoriesRes.data);
         setInstructors(instructorsRes.data);
         setError('');
       } catch (err) {
         console.error('Veri yüklenirken hata:', err);
-        setError('Kategoriler ve eğitmenler yüklenirken hata oluştu.');
+        setError('Veriler yüklenirken hata oluştu.');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [id]);
 
   const validateForm = () => {
     if (!classData.className.trim()) {
@@ -145,6 +162,7 @@ function AddClass() {
       }
 
       const formattedData = {
+        id: parseInt(id),
         className: classData.className.trim(),
         description: classData.description || "",
         startTime: startTime.toISOString(),
@@ -152,27 +170,14 @@ function AddClass() {
         capacity: parseInt(classData.capacity),
         instructorId: parseInt(classData.instructorId),
         classCategoryId: parseInt(classData.classCategoryId),
-        dayOfWeek: parseInt(classData.dayOfWeek),
-        memberClasses: []
+        dayOfWeek: parseInt(classData.dayOfWeek)
       };
 
-      console.log('Gönderilecek veri:', formattedData);
-
-      const response = await axios.post('/api/Classes', formattedData);
-      console.log('Sunucu yanıtı:', response.data);
-      
+      await axios.put(`/api/Classes/${id}`, formattedData);
       navigate('/classes');
     } catch (err) {
-      console.error('Sınıf eklenirken hata:', err);
-      console.error('Hata detayı:', err.response?.data);
-      
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Sınıf eklenirken bir hata oluştu. Lütfen tekrar deneyin.');
-      }
+      console.error('Sınıf güncellenirken hata:', err);
+      setError('Sınıf güncellenirken bir hata oluştu.');
     } finally {
       setLoading(false);
     }
@@ -182,13 +187,11 @@ function AddClass() {
     return <div className="loading">Yükleniyor...</div>;
   }
 
-  if (error) {
-    return <div className="error-message">{error}</div>;
-  }
-
   return (
     <div className="class-form">
-      <h2>Yeni Sınıf Ekle</h2>
+      <h2>Sınıf Düzenle</h2>
+      
+      {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -353,7 +356,7 @@ function AddClass() {
             className="submit-button"
             disabled={loading}
           >
-            {loading ? 'Kaydediliyor...' : 'Kaydet'}
+            {loading ? 'Güncelleniyor...' : 'Güncelle'}
           </button>
         </div>
       </form>
@@ -361,4 +364,4 @@ function AddClass() {
   );
 }
 
-export default AddClass; 
+export default EditClass; 

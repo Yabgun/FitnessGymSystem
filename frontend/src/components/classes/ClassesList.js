@@ -34,6 +34,18 @@ function ClassesList() {
     }
   };
 
+  const getDayName = (dayOfWeek) => {
+    const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    return days[dayOfWeek];
+  };
+
+  const formatTime = (timeString) => {
+    const date = new Date(timeString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   if (loading) {
     return <div className="page-container">Yükleniyor...</div>;
   }
@@ -53,11 +65,18 @@ function ClassesList() {
       <div className="grid-container">
         {classes.map(classItem => (
           <div key={classItem.id} className="card">
-            <h2>{classItem.className}</h2>
+            <div className="class-header">
+              <h2>{classItem.className}</h2>
+              {classItem.classCategory && (
+                <span className="category-badge">
+                  {classItem.classCategory.name}
+                </span>
+              )}
+            </div>
             <div className="class-details">
               <p>
-                <span className="detail-label">Kategori:</span>
-                <span className="detail-value">{classItem.classCategory?.name}</span>
+                <span className="detail-label">Gün:</span>
+                <span className="detail-value">{getDayName(classItem.dayOfWeek)}</span>
               </p>
               <p>
                 <span className="detail-label">Eğitmen:</span>
@@ -68,8 +87,7 @@ function ClassesList() {
               <p>
                 <span className="detail-label">Saat:</span>
                 <span className="detail-value">
-                  {new Date(classItem.startTime).toLocaleTimeString()} - 
-                  {new Date(classItem.endTime).toLocaleTimeString()}
+                  {formatTime(classItem.startTime)} - {formatTime(classItem.endTime)}
                 </span>
               </p>
               <p>

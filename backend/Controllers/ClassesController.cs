@@ -23,6 +23,8 @@ namespace FitnessGymSystem.Controllers
             try
             {
                 var classes = await _context.Classes
+                    .Include(c => c.ClassCategory)
+                    .Include(c => c.Instructor)
                     .Select(c => new
                     {
                         c.Id,
@@ -31,10 +33,11 @@ namespace FitnessGymSystem.Controllers
                         c.StartTime,
                         c.EndTime,
                         c.Capacity,
+                        c.DayOfWeek,
                         c.ClassCategoryId,
                         c.InstructorId,
-                        Category = new { c.ClassCategory.Id, c.ClassCategory.Name },
-                        Instructor = new { c.Instructor.Id, c.Instructor.FirstName, c.Instructor.LastName }
+                        ClassCategory = c.ClassCategory == null ? null : new { c.ClassCategory.Id, c.ClassCategory.Name },
+                        Instructor = c.Instructor == null ? null : new { c.Instructor.Id, c.Instructor.FirstName, c.Instructor.LastName }
                     })
                     .ToListAsync();
 
@@ -75,6 +78,10 @@ namespace FitnessGymSystem.Controllers
 
             try
             {
+                // Saatleri UTC olarak ayarla
+                classModel.StartTime = DateTime.SpecifyKind(classModel.StartTime, DateTimeKind.Utc);
+                classModel.EndTime = DateTime.SpecifyKind(classModel.EndTime, DateTimeKind.Utc);
+
                 // Navigation property'leri null olarak ayarla
                 classModel.ClassCategory = null;
                 classModel.Instructor = null;
@@ -107,10 +114,10 @@ namespace FitnessGymSystem.Controllers
 
         // Var olan bir dersi güncelle
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Class updated)
+        public async Task<IActionResult> UpdateClass(int id, [FromBody] Class updated)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (id != updated.Id)
+                return BadRequest(new { message = "ID'ler eşleşmiyor." });
 
             var cls = await _context.Classes
                 .Include(c => c.MemberClasses)
@@ -123,12 +130,17 @@ namespace FitnessGymSystem.Controllers
             if (updated.Capacity < cls.MemberClasses.Count)
                 return BadRequest(new { message = "Yeni kapasite mevcut üye sayısından az olamaz." });
 
+            // Saatleri UTC olarak ayarla
+            updated.StartTime = DateTime.SpecifyKind(updated.StartTime, DateTimeKind.Utc);
+            updated.EndTime = DateTime.SpecifyKind(updated.EndTime, DateTimeKind.Utc);
+
             // Alanları güncelle
             cls.ClassName = updated.ClassName;
             cls.Description = updated.Description;
             cls.StartTime = updated.StartTime;
             cls.EndTime = updated.EndTime;
             cls.Capacity = updated.Capacity;
+            cls.DayOfWeek = updated.DayOfWeek;
             cls.ClassCategoryId = updated.ClassCategoryId;
             cls.InstructorId = updated.InstructorId;
 

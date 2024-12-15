@@ -2,14 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace FitnessGymSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] // Şimdilik kaldırıyoruz
     public class MembersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +23,10 @@ namespace FitnessGymSystem.Controllers
             var members = await _context.Members
                 .Include(m => m.MemberClasses)
                     .ThenInclude(mc => mc.Class)
+                        .ThenInclude(c => c.Instructor)
+                .AsNoTracking()
                 .ToListAsync();
+
             return Ok(members);
         }
 
@@ -37,6 +37,8 @@ namespace FitnessGymSystem.Controllers
             var member = await _context.Members
                 .Include(m => m.MemberClasses)
                     .ThenInclude(mc => mc.Class)
+                        .ThenInclude(c => c.Instructor)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (member == null)
@@ -49,12 +51,56 @@ namespace FitnessGymSystem.Controllers
 
         // Yeni üye ekle
         [HttpPost]
-        public async Task<ActionResult<Member>> CreateMember(Member member)
+        public async Task<ActionResult<Member>> CreateMember([FromBody] MemberCreateModel model)
         {
-            _context.Members.Add(member);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var member = new Member
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    DateOfBirth = model.DateOfBirth,
+                    MemberClasses = new List<MemberClass>()
+                };
 
-            return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
+                // Önce member'ı kaydet
+                _context.Members.Add(member);
+                await _context.SaveChangesAsync();
+
+                // Sonra sınıf ilişkilerini ekle
+                if (model.SelectedClasses != null && model.SelectedClasses.Any())
+                {
+                    foreach (var classId in model.SelectedClasses)
+                    {
+                        var memberClass = new MemberClass
+                        {
+                            MemberId = member.Id,
+                            ClassId = classId
+                        };
+                        _context.MemberClasses.Add(memberClass);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                // Reload the member with all relationships
+                var createdMember = await _context.Members
+                    .Include(m => m.MemberClasses)
+                        .ThenInclude(mc => mc.Class)
+                            .ThenInclude(c => c.Instructor)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.Id == member.Id);
+
+                if (createdMember == null)
+                {
+                    return StatusCode(500, new { message = "Üye oluşturuldu fakat yüklenemedi" });
+                }
+
+                return CreatedAtAction(nameof(GetMember), new { id = createdMember.Id }, createdMember);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Üye eklenirken bir hata oluştu", error = ex.Message });
+            }
         }
 
         // Üye güncelle
@@ -77,7 +123,7 @@ namespace FitnessGymSystem.Controllers
                 existingMember.LastName = member.LastName;
                 existingMember.DateOfBirth = member.DateOfBirth;
 
-                // Mevcut sınıf kayıtlarını güncelle
+                // Mevcut s��nıf kayıtlarını güncelle
                 if (existingMember.MemberClasses != null)
                 {
                     _context.MemberClasses.RemoveRange(existingMember.MemberClasses);
@@ -87,13 +133,26 @@ namespace FitnessGymSystem.Controllers
                 {
                     foreach (var memberClass in member.MemberClasses)
                     {
-                        memberClass.MemberId = id;
-                        _context.MemberClasses.Add(memberClass);
+                        var newMemberClass = new MemberClass
+                        {
+                            MemberId = id,
+                            ClassId = memberClass.ClassId
+                        };
+                        _context.MemberClasses.Add(newMemberClass);
                     }
                 }
 
                 await _context.SaveChangesAsync();
-                return Ok(existingMember);
+
+                // Güncellenmiş üyeyi ilişkili verilerle birlikte getir
+                var updatedMember = await _context.Members
+                    .Include(m => m.MemberClasses)
+                        .ThenInclude(mc => mc.Class)
+                            .ThenInclude(c => c.Instructor)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.Id == id);
+
+                return Ok(updatedMember);
             }
             catch (Exception ex)
             {
@@ -120,5 +179,13 @@ namespace FitnessGymSystem.Controllers
 
             return NoContent();
         }
+    }
+
+    public class MemberCreateModel
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public List<int> SelectedClasses { get; set; }
     }
 }

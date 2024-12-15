@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using System.Linq;
 
 namespace FitnessGymSystem.Models
 {
@@ -25,7 +27,16 @@ namespace FitnessGymSystem.Models
     [Required(ErrorMessage = "Doğum tarihi zorunludur")]
     public DateTime DateOfBirth { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<MemberClass> MemberClasses { get; set; }
+
+    public IEnumerable<Class> Classes 
+    { 
+        get 
+        {
+            return MemberClasses?.Select(mc => mc.Class) ?? Enumerable.Empty<Class>();
+        }
+    }
 }
 
 
