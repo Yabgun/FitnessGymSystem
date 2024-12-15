@@ -87,13 +87,12 @@ function AddClass() {
         return;
       }
 
-      // Tarih ve saat formatını düzenleme
-      const today = new Date().toISOString().split('T')[0];
+      // Saat formatını düzenleme
       const formattedData = {
         className: classData.className.trim(),
         description: classData.description || "",
-        startTime: `${today}T${classData.startTime}:00`,
-        endTime: `${today}T${classData.endTime}:00`,
+        startTime: `${classData.startTime}:00`,
+        endTime: `${classData.endTime}:00`,
         capacity: parseInt(classData.capacity),
         instructorId: parseInt(classData.instructorId),
         classCategoryId: parseInt(classData.classCategoryId),

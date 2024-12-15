@@ -89,11 +89,17 @@ function AddClass() {
 
       // Tarih ve saat formatını düzenleme
       const today = new Date().toISOString().split('T')[0];
+      const [startHours, startMinutes] = classData.startTime.split(':');
+      const [endHours, endMinutes] = classData.endTime.split(':');
+      
+      const startTime = new Date(`${today}T${startHours}:${startMinutes}:00`);
+      const endTime = new Date(`${today}T${endHours}:${endMinutes}:00`);
+
       const formattedData = {
         className: classData.className.trim(),
         description: classData.description || "",
-        startTime: `${today}T${classData.startTime}:00`,
-        endTime: `${today}T${classData.endTime}:00`,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
         capacity: parseInt(classData.capacity),
         instructorId: parseInt(classData.instructorId),
         classCategoryId: parseInt(classData.classCategoryId),
