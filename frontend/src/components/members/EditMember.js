@@ -15,7 +15,7 @@ function EditMember() {
   });
 
   const [classes, setClasses] = useState([]);
-  const [selectedClassId, setSelectedClassId] = useState(null);
+  const [selectedClassIds, setSelectedClassIds] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -34,9 +34,9 @@ function EditMember() {
         });
         
         setClasses(classesResponse.data);
-        // Üyenin mevcut sınıfını seç
+        // Üyenin mevcut sınıflarını seç
         if (memberData.memberClasses && memberData.memberClasses.length > 0) {
-          setSelectedClassId(memberData.memberClasses[0].classId);
+          setSelectedClassIds(memberData.memberClasses.map(mc => mc.classId));
         }
       } catch (err) {
         setError('Üye bilgileri yüklenirken bir hata oluştu');
@@ -48,28 +48,32 @@ function EditMember() {
     fetchData();
   }, [id]);
 
+  const handleClassToggle = (classId) => {
+    setSelectedClassIds(prev => {
+      if (prev.includes(classId)) {
+        return prev.filter(id => id !== classId);
+      } else {
+        return [...prev, classId];
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!selectedClassId) {
-      setError('Lütfen bir sınıf seçin');
+    if (selectedClassIds.length === 0) {
+      setError('Lütfen en az bir sınıf seçin');
       return;
     }
 
     try {
       setLoading(true);
-      
-      // Seçilen sınıfı bul
-      const selectedClass = classes.find(c => c.id === selectedClassId);
-      if (!selectedClass) {
-        throw new Error('Seçilen sınıf bulunamadı');
-      }
 
       const updatedMember = {
         firstName: member.firstName,
         lastName: member.lastName,
         dateOfBirth: member.dateOfBirth,
-        selectedClasses: [selectedClassId]
+        selectedClasses: selectedClassIds
       };
 
       await axios.put(`/api/Members/${id}`, updatedMember);
@@ -136,19 +140,18 @@ function EditMember() {
 
           <div className="form-section">
             <h2 className="section-title">Sınıf Seçimi</h2>
-            <p className="section-description">Üyenin katılacağı sınıfı seçin. Sadece bir sınıf seçilebilir.</p>
+            <p className="section-description">Üyenin katılacağı sınıfları seçin. Birden fazla sınıf seçilebilir.</p>
             
             <div className="class-selection">
               {classes.map(cls => (
-                <div key={cls.id} className={`class-card ${selectedClassId === cls.id ? 'selected' : ''}`}>
+                <div key={cls.id} className={`class-card ${selectedClassIds.includes(cls.id) ? 'selected' : ''}`}>
                   <input
-                    type="radio"
+                    type="checkbox"
                     id={`class-${cls.id}`}
                     name="classSelection"
                     value={cls.id}
-                    checked={selectedClassId === cls.id}
-                    onChange={(e) => setSelectedClassId(parseInt(e.target.value))}
-                    required
+                    checked={selectedClassIds.includes(cls.id)}
+                    onChange={() => handleClassToggle(cls.id)}
                   />
                   <label htmlFor={`class-${cls.id}`}>
                     <div className="class-name">{cls.className}</div>
