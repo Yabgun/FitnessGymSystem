@@ -2,18 +2,23 @@ using Microsoft.AspNetCore.Mvc;
 using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace FitnessGymSystem.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MembersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<MembersController> _logger;
 
-        public MembersController(ApplicationDbContext context)
+        public MembersController(ApplicationDbContext context, ILogger<MembersController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // Tüm üyeleri getir
@@ -55,6 +60,15 @@ namespace FitnessGymSystem.Controllers
         {
             try
             {
+                _logger.LogInformation($"Creating member with data: FirstName={model.FirstName}, LastName={model.LastName}, DateOfBirth={model.DateOfBirth}");
+
+                // Model validasyonu
+                if (string.IsNullOrEmpty(model.FirstName) || string.IsNullOrEmpty(model.LastName))
+                {
+                    _logger.LogWarning("Invalid model data: FirstName or LastName is empty");
+                    return BadRequest(new { message = "Ad ve soyad alanları zorunludur" });
+                }
+
                 var member = new Member
                 {
                     FirstName = model.FirstName,
@@ -63,42 +77,74 @@ namespace FitnessGymSystem.Controllers
                     MemberClasses = new List<MemberClass>()
                 };
 
-                // Önce member'ı kaydet
-                _context.Members.Add(member);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Members.Add(member);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Member saved to database with ID: {member.Id}");
+                }
+                catch (Exception dbEx)
+                {
+                    _logger.LogError($"Database error while saving member: {dbEx.Message}");
+                    return StatusCode(500, new { message = "Üye kaydedilirken veritabanı hatası oluştu", error = dbEx.Message });
+                }
 
-                // Sonra sınıf ilişkilerini ekle
                 if (model.SelectedClasses != null && model.SelectedClasses.Any())
                 {
                     foreach (var classId in model.SelectedClasses)
                     {
-                        var memberClass = new MemberClass
+                        try
                         {
-                            MemberId = member.Id,
-                            ClassId = classId
-                        };
-                        _context.MemberClasses.Add(memberClass);
+                            var classExists = await _context.Classes.AnyAsync(c => c.Id == classId);
+                            if (!classExists)
+                            {
+                                _logger.LogWarning($"Class with ID {classId} does not exist");
+                                continue;
+                            }
+
+                            var memberClass = new MemberClass
+                            {
+                                MemberId = member.Id,
+                                ClassId = classId
+                            };
+                            _context.MemberClasses.Add(memberClass);
+                            await _context.SaveChangesAsync();
+                            _logger.LogInformation($"Added class {classId} to member {member.Id}");
+                        }
+                        catch (Exception classEx)
+                        {
+                            _logger.LogError($"Error adding class {classId} to member {member.Id}: {classEx.Message}");
+                        }
                     }
-                    await _context.SaveChangesAsync();
                 }
 
-                // Reload the member with all relationships
-                var createdMember = await _context.Members
-                    .Include(m => m.MemberClasses)
-                        .ThenInclude(mc => mc.Class)
-                            .ThenInclude(c => c.Instructor)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.Id == member.Id);
-
-                if (createdMember == null)
+                try
                 {
-                    return StatusCode(500, new { message = "Üye oluşturuldu fakat yüklenemedi" });
-                }
+                    var createdMember = await _context.Members
+                        .Include(m => m.MemberClasses)
+                            .ThenInclude(mc => mc.Class)
+                                .ThenInclude(c => c.Instructor)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(m => m.Id == member.Id);
 
-                return CreatedAtAction(nameof(GetMember), new { id = createdMember.Id }, createdMember);
+                    if (createdMember == null)
+                    {
+                        _logger.LogError($"Member with ID {member.Id} not found after creation");
+                        return StatusCode(500, new { message = "Üye oluşturuldu fakat yüklenemedi" });
+                    }
+
+                    _logger.LogInformation($"Successfully created member with ID: {member.Id}");
+                    return CreatedAtAction(nameof(GetMember), new { id = createdMember.Id }, createdMember);
+                }
+                catch (Exception loadEx)
+                {
+                    _logger.LogError($"Error loading created member: {loadEx.Message}");
+                    return StatusCode(500, new { message = "Üye oluşturuldu fakat detayları yüklenirken hata oluştu" });
+                }
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Unexpected error in CreateMember: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 return StatusCode(500, new { message = "Üye eklenirken bir hata oluştu", error = ex.Message });
             }
         }
@@ -123,7 +169,7 @@ namespace FitnessGymSystem.Controllers
                 existingMember.LastName = member.LastName;
                 existingMember.DateOfBirth = member.DateOfBirth;
 
-                // Mevcut s��nıf kayıtlarını güncelle
+                // Mevcut sınıf kayıtlarını güncelle
                 if (existingMember.MemberClasses != null)
                 {
                     _context.MemberClasses.RemoveRange(existingMember.MemberClasses);
