@@ -26,9 +26,9 @@ function AddClass() {
   const [endHour, setEndHour] = useState('');
   const [endMinute, setEndMinute] = useState('');
 
-  // Saat ve dakika seçeneklerini oluştur
-  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
-  const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+  // Saat ve dakika seçeneklerini oluştur (08:00 - 21:00)
+  const hours = Array.from({ length: 14 }, (_, i) => String(i + 8).padStart(2, '0'));
+  const minutes = ['00', '30'];
 
   // Saat değişikliklerini handle et
   const handleTimeChange = (type, value) => {
@@ -128,16 +128,29 @@ function AddClass() {
         return;
       }
 
-      // Bugünün tarihini al ve saatleri ekle
+      // Bugünün tarihini al
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Günün başlangıcına ayarla
+
+      // Seçilen günü bugüne ekle
+      const selectedDay = parseInt(classData.dayOfWeek);
+      const currentDay = today.getDay();
+      const daysToAdd = selectedDay >= currentDay ? 
+        selectedDay - currentDay : 
+        7 - (currentDay - selectedDay);
+      
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + daysToAdd);
+
+      // Başlangıç ve bitiş saatlerini ayarla
       const [startHours, startMinutes] = classData.startTime.split(':');
       const [endHours, endMinutes] = classData.endTime.split(':');
 
-      const startTime = new Date(today);
-      startTime.setHours(parseInt(startHours), parseInt(startMinutes), 0);
+      const startTime = new Date(targetDate);
+      startTime.setHours(parseInt(startHours), parseInt(startMinutes), 0, 0);
 
-      const endTime = new Date(today);
-      endTime.setHours(parseInt(endHours), parseInt(endMinutes), 0);
+      const endTime = new Date(targetDate);
+      endTime.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
 
       // Eğer bitiş saati başlangıç saatinden küçükse, bitiş saatini bir sonraki güne ayarla
       if (endTime < startTime) {
@@ -152,7 +165,7 @@ function AddClass() {
         capacity: parseInt(classData.capacity),
         instructorId: parseInt(classData.instructorId),
         classCategoryId: parseInt(classData.classCategoryId),
-        dayOfWeek: parseInt(classData.dayOfWeek),
+        dayOfWeek: selectedDay,
         memberClasses: []
       };
 
