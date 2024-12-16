@@ -66,19 +66,10 @@ function EditMember() {
       }
 
       const updatedMember = {
-        ...member,
-        id: parseInt(id),
-        memberClasses: [{
-          classId: selectedClassId,
-          memberId: parseInt(id),
-          class: selectedClass,
-          member: {
-            id: parseInt(id),
-            firstName: member.firstName,
-            lastName: member.lastName,
-            dateOfBirth: member.dateOfBirth
-          }
-        }]
+        firstName: member.firstName,
+        lastName: member.lastName,
+        dateOfBirth: member.dateOfBirth,
+        selectedClasses: [selectedClassId]
       };
 
       await axios.put(`/api/Members/${id}`, updatedMember);

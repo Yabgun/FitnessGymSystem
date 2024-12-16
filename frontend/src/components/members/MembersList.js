@@ -15,6 +15,13 @@ function MembersList() {
   const fetchMembers = async () => {
     try {
       const response = await axios.get('/api/Members');
+      console.log('Backend response:', response.data);
+      if (response.data && response.data.length > 0) {
+        console.log('First member classes:', response.data[0].memberClasses);
+        if (response.data[0].memberClasses && response.data[0].memberClasses.length > 0) {
+          console.log('First member first class:', response.data[0].memberClasses[0]);
+        }
+      }
       setMembers(response.data);
       setLoading(false);
     } catch (error) {
@@ -58,11 +65,21 @@ function MembersList() {
             
             <div className="card-classes">
               <h3>Katıldığı Sınıflar:</h3>
-              <ul>
-                {member.memberClasses?.map(mc => (
-                  <li key={mc.classId}>{mc.class?.className}</li>
-                ))}
-              </ul>
+              {member.memberClasses?.filter(mc => mc.class && mc.class.className).length > 0 ? (
+                <ul>
+                  {member.memberClasses
+                    .filter(mc => mc.class && mc.class.className)
+                    .map(mc => (
+                      <li key={mc.classId || mc.id}>
+                        {mc.class.className}
+                        {mc.class.instructor && 
+                          ` - ${mc.class.instructor.firstName} ${mc.class.instructor.lastName}`}
+                      </li>
+                    ))}
+                </ul>
+              ) : (
+                <p>Henüz bir sınıfa kayıtlı değil</p>
+              )}
             </div>
 
             <div className="card-actions">

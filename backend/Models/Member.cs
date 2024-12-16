@@ -27,14 +27,14 @@ namespace FitnessGymSystem.Models
     [Required(ErrorMessage = "Doğum tarihi zorunludur")]
     public DateTime DateOfBirth { get; set; }
 
-    [JsonIgnore]
     public virtual ICollection<MemberClass> MemberClasses { get; set; }
 
-    public IEnumerable<Class> Classes 
+    [JsonIgnore]
+    public ICollection<Class> Classes 
     { 
         get 
         {
-            return MemberClasses?.Select(mc => mc.Class) ?? Enumerable.Empty<Class>();
+            return MemberClasses?.Select(mc => mc.Class).ToList() ?? new List<Class>();
         }
     }
 }

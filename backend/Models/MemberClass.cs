@@ -10,7 +10,6 @@ namespace FitnessGymSystem.Models
         public Member Member { get; set; }
 
         public int ClassId { get; set; }
-        [JsonIgnore]
         public Class Class { get; set; }
     }
 }
