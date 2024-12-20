@@ -63,7 +63,7 @@ function MembersList() {
             <h2>{member.firstName} {member.lastName}</h2>
             <p>Doğum Tarihi: {new Date(member.dateOfBirth).toLocaleDateString()}</p>
             
-            <div className="card-classes">
+            {/* <div className="card-classes">
               <h3>Katıldığı Sınıflar:</h3>
               {member.memberClasses?.filter(mc => mc.class && mc.class.className).length > 0 ? (
                 <ul>
@@ -80,7 +80,7 @@ function MembersList() {
               ) : (
                 <p>Henüz bir sınıfa kayıtlı değil</p>
               )}
-            </div>
+            </div> */}
 
             <div className="card-actions">
               <button 

@@ -4,6 +4,7 @@ using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using FitnessGymSystem.Attributes;
 
 namespace FitnessGymSystem.Controllers
 {
@@ -30,6 +31,10 @@ namespace FitnessGymSystem.Controllers
                 var members = await _context.Members
                     .Include(m => m.MemberClasses)
                         .ThenInclude(mc => mc.Class)
+                            .ThenInclude(c => c.Instructor)
+                    .Include(m => m.MemberClasses)
+                        .ThenInclude(mc => mc.Class)
+                            .ThenInclude(c => c.ClassCategory)
                     .AsNoTracking()
                     .Select(m => new
                     {
@@ -42,12 +47,18 @@ namespace FitnessGymSystem.Controllers
                             mc.Class.Id,
                             mc.Class.ClassName,
                             mc.Class.Description,
-                            mc.Class.StartTime,
-                            mc.Class.EndTime,
+                            StartTime = mc.Class.StartTime.AddHours(3),
+                            EndTime = mc.Class.EndTime.AddHours(3),
                             mc.Class.Capacity,
                             mc.Class.DayOfWeek,
                             mc.Class.ClassCategoryId,
-                            mc.Class.InstructorId
+                            CategoryName = mc.Class.ClassCategory.Name,
+                            mc.Class.InstructorId,
+                            Instructor = new
+                            {
+                                mc.Class.Instructor.FirstName,
+                                mc.Class.Instructor.LastName
+                            }
                         }).ToList()
                     })
                     .ToListAsync();
@@ -81,6 +92,7 @@ namespace FitnessGymSystem.Controllers
 
         // Yeni üye ekle
         [HttpPost]
+        [AdminOnly]
         public async Task<ActionResult<Member>> CreateMember([FromBody] MemberCreateModel model)
         {
             try
@@ -189,6 +201,7 @@ namespace FitnessGymSystem.Controllers
 
         // Üye güncelle
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateMember(int id, [FromBody] MemberUpdateModel model)
         {
             try 
@@ -268,6 +281,7 @@ namespace FitnessGymSystem.Controllers
 
         // Üye sil
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteMember(int id)
         {
             var member = await _context.Members

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
+using FitnessGymSystem.Attributes;
 
 namespace FitnessGymSystem.Controllers
 {
@@ -69,6 +70,7 @@ namespace FitnessGymSystem.Controllers
 
         // Yeni bir ders oluştur
         [HttpPost]
+        [AdminOnly]
         public async Task<IActionResult> AddClass([FromBody] Class classModel)
         {
             if (!ModelState.IsValid)
@@ -137,6 +139,7 @@ namespace FitnessGymSystem.Controllers
 
         // Var olan bir dersi güncelle
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateClass(int id, [FromBody] Class updated)
         {
             var cls = await _context.Classes
@@ -186,6 +189,7 @@ namespace FitnessGymSystem.Controllers
 
         // Var olan bir dersi sil
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteClass(int id)
         {
             try
@@ -217,6 +221,7 @@ namespace FitnessGymSystem.Controllers
 
         // Sınıfa üye ekle
         [HttpPost("{classId}/enroll/{memberId}")]
+        [AdminOnly]
         public async Task<IActionResult> EnrollMember(int classId, int memberId)
         {
             var cls = await _context.Classes
@@ -248,6 +253,7 @@ namespace FitnessGymSystem.Controllers
 
         // Sınıftan üye çıkar
         [HttpDelete("{classId}/unenroll/{memberId}")]
+        [AdminOnly]
         public async Task<IActionResult> UnenrollMember(int classId, int memberId)
         {
             var memberClass = await _context.MemberClasses

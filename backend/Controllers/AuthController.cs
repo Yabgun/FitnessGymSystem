@@ -51,11 +51,12 @@ namespace FitnessGymSystem.Controllers
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                var token = GenerateJwtToken(user.Username);
+                var token = GenerateJwtToken(user.Username, false);
                 return Ok(new { 
                     token = token,
                     username = user.Username,
-                    email = user.Email
+                    email = user.Email,
+                    isAdmin = false
                 });
             }
             catch (Exception ex)
@@ -74,6 +75,21 @@ namespace FitnessGymSystem.Controllers
                     return BadRequest("Kullanıcı adı ve şifre gereklidir.");
                 }
 
+                var adminEmail = _configuration["AdminCredentials:Email"];
+                var adminPassword = _configuration["AdminCredentials:Password"];
+                bool isAdmin = false;
+
+                if (model.Username == adminEmail && model.Password == adminPassword)
+                {
+                    var token = GenerateJwtToken(adminEmail, true);
+                    return Ok(new { 
+                        token = token,
+                        username = adminEmail,
+                        email = adminEmail,
+                        isAdmin = true
+                    });
+                }
+
                 var user = _context.Users.FirstOrDefault(u => 
                     u.Username == model.Username && 
                     u.Password == model.Password);
@@ -83,11 +99,12 @@ namespace FitnessGymSystem.Controllers
                     return Unauthorized(new { message = "Kullanıcı adı veya şifre hatalı" });
                 }
 
-                var token = GenerateJwtToken(user.Username);
+                var userToken = GenerateJwtToken(user.Username, false);
                 return Ok(new { 
-                    token = token,
+                    token = userToken,
                     username = user.Username,
-                    email = user.Email
+                    email = user.Email,
+                    isAdmin = false
                 });
             }
             catch (Exception ex)
@@ -96,12 +113,13 @@ namespace FitnessGymSystem.Controllers
             }
         }
 
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(string username, bool isAdmin)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("IsAdmin", isAdmin.ToString().ToLower())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

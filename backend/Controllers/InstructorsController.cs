@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
+using FitnessGymSystem.Attributes;
 
 namespace FitnessGymSystem.Controllers
 {
@@ -61,6 +62,7 @@ namespace FitnessGymSystem.Controllers
 
         // POST: api/Instructors
         [HttpPost]
+        [AdminOnly]
         public async Task<ActionResult<Instructor>> CreateInstructor([FromBody] Instructor instructor)
         {
             try
@@ -93,6 +95,7 @@ namespace FitnessGymSystem.Controllers
 
         // PUT: api/Instructors/5
         [HttpPut("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> UpdateInstructor(int id, [FromBody] Instructor instructor)
         {
             if (id != instructor.Id)
@@ -118,6 +121,7 @@ namespace FitnessGymSystem.Controllers
 
         // DELETE: api/Instructors/5
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteInstructor(int id)
         {
             var instructor = await _context.Instructors.FindAsync(id);

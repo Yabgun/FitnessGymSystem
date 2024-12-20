@@ -3,6 +3,7 @@ using FitnessGymSystem.Data;
 using FitnessGymSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using FitnessGymSystem.Attributes;
 
 namespace FitnessGymSystem.Controllers
 {
@@ -58,7 +59,8 @@ namespace FitnessGymSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ClassCategory category)
+        [AdminOnly]
+        public async Task<IActionResult> AddCategory([FromBody] ClassCategory category)
         {
             try
             {
@@ -97,29 +99,30 @@ namespace FitnessGymSystem.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ClassCategory updated)
+        [AdminOnly]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] ClassCategory updatedCategory)
         {
             try
             {
-                if (updated == null)
+                if (updatedCategory == null)
                     return BadRequest(new { message = "Geçersiz kategori verisi" });
 
                 var category = await _context.ClassCategories.FindAsync(id);
                 if (category == null)
                     return NotFound(new { message = "Kategori bulunamadı" });
 
-                if (string.IsNullOrWhiteSpace(updated.Name))
+                if (string.IsNullOrWhiteSpace(updatedCategory.Name))
                     return BadRequest(new { message = "Kategori adı boş olamaz" });
 
                 // Aynı isimde başka kategori var mı kontrol et
                 var existingCategory = await _context.ClassCategories
-                    .FirstOrDefaultAsync(c => c.Name.ToLower() == updated.Name.ToLower() && c.Id != id);
+                    .FirstOrDefaultAsync(c => c.Name.ToLower() == updatedCategory.Name.ToLower() && c.Id != id);
 
                 if (existingCategory != null)
                     return BadRequest(new { message = "Bu isimde bir kategori zaten mevcut" });
 
-                category.Name = Regex.Replace(updated.Name.Trim(), @"\s+", " ");
-                category.Description = updated.Description?.Trim();
+                category.Name = Regex.Replace(updatedCategory.Name.Trim(), @"\s+", " ");
+                category.Description = updatedCategory.Description?.Trim();
 
                 await _context.SaveChangesAsync();
                 return Ok(category);
@@ -131,6 +134,7 @@ namespace FitnessGymSystem.Controllers
         }
 
         [HttpDelete("{id}")]
+        [AdminOnly]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             try
