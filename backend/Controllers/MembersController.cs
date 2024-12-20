@@ -25,14 +25,39 @@ namespace FitnessGymSystem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Member>>> GetMembers()
         {
-            var members = await _context.Members
-                .Include(m => m.MemberClasses)
-                    .ThenInclude(mc => mc.Class)
-                        .ThenInclude(c => c.Instructor)
-                .AsNoTracking()
-                .ToListAsync();
+            try 
+            {
+                var members = await _context.Members
+                    .Include(m => m.MemberClasses)
+                        .ThenInclude(mc => mc.Class)
+                    .AsNoTracking()
+                    .Select(m => new
+                    {
+                        m.Id,
+                        m.FirstName,
+                        m.LastName,
+                        m.DateOfBirth,
+                        Classes = m.MemberClasses.Select(mc => new
+                        {
+                            mc.Class.Id,
+                            mc.Class.ClassName,
+                            mc.Class.Description,
+                            mc.Class.StartTime,
+                            mc.Class.EndTime,
+                            mc.Class.Capacity,
+                            mc.Class.DayOfWeek,
+                            mc.Class.ClassCategoryId,
+                            mc.Class.InstructorId
+                        }).ToList()
+                    })
+                    .ToListAsync();
 
-            return Ok(members);
+                return Ok(members);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Üyeler yüklenirken bir hata oluştu", error = ex.Message });
+            }
         }
 
         // Belirli bir üyeyi getir

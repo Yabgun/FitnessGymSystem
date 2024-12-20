@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitnessGymSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241215135122_UpdateDeleteBehavior")]
-    partial class UpdateDeleteBehavior
+    [Migration("20241220193910_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,9 @@ namespace FitnessGymSystem.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -48,6 +51,9 @@ namespace FitnessGymSystem.Migrations
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MemberId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime(6)");
 
@@ -56,6 +62,8 @@ namespace FitnessGymSystem.Migrations
                     b.HasIndex("ClassCategoryId");
 
                     b.HasIndex("InstructorId");
+
+                    b.HasIndex("MemberId");
 
                     b.ToTable("Classes");
                 });
@@ -189,6 +197,10 @@ namespace FitnessGymSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FitnessGymSystem.Models.Member", null)
+                        .WithMany("Classes")
+                        .HasForeignKey("MemberId");
+
                     b.Navigation("ClassCategory");
 
                     b.Navigation("Instructor");
@@ -239,6 +251,8 @@ namespace FitnessGymSystem.Migrations
 
             modelBuilder.Entity("FitnessGymSystem.Models.Member", b =>
                 {
+                    b.Navigation("Classes");
+
                     b.Navigation("MemberClasses");
                 });
 #pragma warning restore 612, 618
