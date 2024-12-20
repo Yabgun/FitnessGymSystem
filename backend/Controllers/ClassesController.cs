@@ -110,7 +110,7 @@ namespace FitnessGymSystem.Controllers
                     // Navigation property'leri null olarak ayarla
                     classModel.ClassCategory = null;
                     classModel.Instructor = null;
-                    classModel.MemberClasses = null;
+                    classModel.MemberClasses = new List<MemberClass>();
 
                     // Veritabanına kaydet
                     _context.Classes.Add(classModel);
@@ -147,9 +147,8 @@ namespace FitnessGymSystem.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Genel Hata: {ex.Message}");
-                Console.WriteLine($"İç Hata: {ex.InnerException?.Message}");
-                return StatusCode(500, new { message = "Sınıf eklenirken bir hata oluştu", error = ex.Message });
+                Console.WriteLine($"Hata: {ex.Message}");
+                return StatusCode(500, new { message = "Sınıf eklenirken bir hata oluştu" });
             }
         }
 
@@ -157,18 +156,16 @@ namespace FitnessGymSystem.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateClass(int id, [FromBody] Class updated)
         {
-            if (id != updated.Id)
-                return BadRequest(new { message = "ID'ler eşleşmiyor." });
-
             var cls = await _context.Classes
                 .Include(c => c.MemberClasses)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (cls == null)
-                return NotFound(new { message = "Ders bulunamadı." });
+                return NotFound(new { message = "Sınıf bulunamadı." });
 
-            // Kapasite kontrolü - mevcut üye sayısından az olamaz
-            if (updated.Capacity < cls.MemberClasses.Count)
+            // Kapasite kontrolü
+            var currentMemberCount = cls.MemberClasses?.Count ?? 0;
+            if (updated.Capacity < currentMemberCount)
                 return BadRequest(new { message = "Yeni kapasite mevcut üye sayısından az olamaz." });
 
             // Saatleri direkt olarak kullan
@@ -230,7 +227,8 @@ namespace FitnessGymSystem.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Sınıf silinirken bir hata oluştu.", error = ex.Message });
+                Console.WriteLine($"Hata: {ex.Message}");
+                return StatusCode(500, new { message = "Sınıf silinirken bir hata oluştu" });
             }
         }
 

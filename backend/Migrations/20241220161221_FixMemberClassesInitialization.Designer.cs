@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FitnessGymSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241215231218_FixMemberClassRelationship")]
-    partial class FixMemberClassRelationship
+    [Migration("20241220161221_FixMemberClassesInitialization")]
+    partial class FixMemberClassesInitialization
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

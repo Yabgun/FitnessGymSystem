@@ -5,7 +5,7 @@
 namespace FitnessGymSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class FixMemberClassRelationship : Migration
+    public partial class FixMemberClassesInitialization : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

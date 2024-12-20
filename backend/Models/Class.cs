@@ -8,6 +8,13 @@ namespace FitnessGymSystem.Models
 {
     public class Class
     {
+        public Class()
+        {
+            MemberClasses = new List<MemberClass>();
+            ClassName = string.Empty;
+            Description = string.Empty;
+        }
+
         public int Id { get; set; }
 
         [Required]
@@ -37,6 +44,6 @@ namespace FitnessGymSystem.Models
         public virtual Instructor? Instructor { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<MemberClass>? MemberClasses { get; set; }
+        public virtual ICollection<MemberClass> MemberClasses { get; set; }
     }
 }
